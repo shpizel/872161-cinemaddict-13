@@ -1,7 +1,7 @@
 # Проект «Киноман» [![Build status][travis-image]][travis-url]
 
 * Студент: [Игорь Шпизель](https://up.htmlacademy.ru/ecmascript/13/user/872161).
-* Наставник: `Неизвестно`.
+* Наставник: [Борис Ванюшин](https://htmlacademy.ru/profile/id62080).
 
 ---
 
