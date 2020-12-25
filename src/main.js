@@ -1,17 +1,20 @@
-import {getFilledArray, render} from './tools';
+import {getFilledList} from './tools';
 import {getProfileHTML} from './view/profile';
 import {getMenuHTML} from "./view/menu";
 import {getSorterHTML} from "./view/sorter";
-import {getFilmsHTML} from "./view/films";
-import {getAllMoviesMessageHTML} from "./view/messages/all-movies";
-import {getFilmsContainerHTML} from "./view/films-container";
-import {getFilmCardHTML} from "./view/film-card";
-import {getExtraHTML} from "./view/extra";
+import {getMoviesInsideHTML} from "./view/movies-inside";
+import {getFilmsSectionHTML} from "./view/films/section";
+import {getFilmsListSectionHTML} from "./view/films/list/section";
+import {getFilmsListTitleHTML} from "./view/films/list/title";
+import {getFilmsListContainerHTML} from "./view/films/list/container";
+import {getFilmCardHTML} from "./view/films/card";
 import {getShowMoreButtonHTML} from "./view/show-more-button";
-// import {getFilmDetailsPopupHTML} from "./view/film-details";
-import {getMoviesInsideMessageHTML} from "./view/messages/movies-inside";
 
-const [FILMS_COUNT, EXTRA_FILMS_COUNT] = [5, 2];
+
+const render = (html, target, where = `beforeend`) => target.insertAdjacentHTML(where, html);
+
+const [FILMS_COUNT, EXTRA_FILMS_COUNT, EXTRA_SECTIONS] = [5, 2, [`Top rated`, `Most commented`]];
+
 
 const headerNode = document.querySelector(`header`);
 const mainNode = document.querySelector(`main`);
@@ -22,16 +25,26 @@ render(getProfileHTML(), headerNode);
 render(getMenuHTML(), mainNode);
 render(getSorterHTML(), mainNode);
 
-const filmsHTML = getFilmsHTML({
-  heading: getAllMoviesMessageHTML(),
-  films: getFilmsContainerHTML(getFilledArray(FILMS_COUNT, getFilmCardHTML)),
-  showMoreButton: getShowMoreButtonHTML(),
-  extraFilms: [
-    getExtraHTML(`Top rated`, getFilmsContainerHTML(getFilledArray(EXTRA_FILMS_COUNT, getFilmCardHTML))),
-    getExtraHTML(`Most commented`, getFilmsContainerHTML(getFilledArray(EXTRA_FILMS_COUNT, getFilmCardHTML)))
-  ].join(`\n`)
+render(getFilmsSectionHTML(), mainNode);
+const filmsSectionNode = mainNode.querySelector(`section.films`);
+
+render(getFilmsListSectionHTML(), filmsSectionNode);
+const filmsListSectionNode = filmsSectionNode.querySelector(`section.films-list`);
+
+render(getFilmsListTitleHTML(`All movies. Upcoming`, true), filmsListSectionNode);
+render(getFilmsListContainerHTML(), filmsListSectionNode);
+const filmsListContainerNode = filmsListSectionNode.querySelector(`div.films-list__container`);
+
+getFilledList(FILMS_COUNT, getFilmCardHTML).forEach((film) => render(film, filmsListContainerNode));
+render(getShowMoreButtonHTML(), filmsListSectionNode);
+
+EXTRA_SECTIONS.forEach((title) => {
+  render(getFilmsListSectionHTML(true), filmsSectionNode);
+  const lastFilmsListExtraSectionNode = filmsSectionNode.querySelector(`section.films-list--extra:last-child`);
+  render(getFilmsListTitleHTML(title), lastFilmsListExtraSectionNode);
+  render(getFilmsListContainerHTML(), lastFilmsListExtraSectionNode);
+  const lastFilmsListExtraContainerNode = lastFilmsListExtraSectionNode.querySelector(`div.films-list__container`);
+  getFilledList(EXTRA_FILMS_COUNT, getFilmCardHTML).forEach((film) => render(film, lastFilmsListExtraContainerNode));
 });
 
-render(filmsHTML, mainNode);
-// render(getFilmDetailsPopupHTML(), footerNode, `afterend`);
-render(getMoviesInsideMessageHTML(), footerStatsNode);
+render(getMoviesInsideHTML(FILMS_COUNT), footerStatsNode);
