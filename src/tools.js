@@ -1,5 +1,7 @@
 export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
+export const getRandomBool = () => Boolean(getRandomNumber(0, 1));
+
 export const shuffle = (list, isImmutable = true) => {
   const listCopy = (isImmutable) ? list.slice() : list;
 
@@ -14,8 +16,8 @@ export const getRandomChoice = (list) => {
   return list[getRandomNumber(0, list.length - 1)];
 };
 
-export const getRandomSlice = (list, length) => {
-  return shuffle(list, true).slice(0, length);
+export const getRandomSlice = (list, length = null) => {
+  return shuffle(list, true).slice(0, length || getRandomNumber(1, list.length));
 };
 
 export const getFilledList = (size, fillFunction) => new Array(size).fill(0).map(fillFunction);

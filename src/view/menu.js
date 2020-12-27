@@ -1,9 +1,9 @@
-export const getMenuHTML = () => `<nav class="main-navigation">
+export const getMenuHTML = (filters) => `
+<nav class="main-navigation">
   <div class="main-navigation__items">
-    <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
-    <a href="#watchlist" class="main-navigation__item">Watchlist <span class="main-navigation__item-count">13</span></a>
-    <a href="#history" class="main-navigation__item">History <span class="main-navigation__item-count">4</span></a>
-    <a href="#favorites" class="main-navigation__item">Favorites <span class="main-navigation__item-count">8</span></a>
+    ${filters.map(({name, isActive, counter}) => `
+<a href="#${name.toLowerCase()}" class="main-navigation__item main-navigation__item--${name.toLowerCase()}${(isActive) ? ` main-navigation__item--active` : ``}">${name} ${(counter !== null) ? `<span class="main-navigation__item-count">${counter}</span>` : ``}</a>
+`).join(`\n`)}
   </div>
   <a href="#stats" class="main-navigation__additional">Stats</a>
 </nav>`;
