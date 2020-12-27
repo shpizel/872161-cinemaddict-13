@@ -80,7 +80,6 @@ const allMoviesHTML = getFilmsListTitleHTML(`All movies. Upcoming`, true);
 const loadingHTML = getFilmsListTitleHTML(`Loading...`, false);
 const noMoviesHTML = getFilmsListTitleHTML(`There are no movies in our database`, false);
 
-render(getProfileHTML(), headerNode);
 render(getMenuHTML(getFilters(films)), mainNode);
 const mainMenuNode = document.querySelector(`nav.main-navigation`);
 const sortingItems = getSortingItems();
@@ -101,6 +100,7 @@ const main = () => {
   filmsListSectionNode.innerHTML = ``;
   mainMenuNode.remove();
   if (films.length > 0) {
+    render(getProfileHTML(films.filter((film) => film.isAlreadyWatched).length), headerNode);
     render(getSortingHTML(sortingItems), mainNode, `afterbegin`);
     render(getMenuHTML(getFilters(films)), mainNode, `afterbegin`);
 
@@ -121,6 +121,7 @@ const main = () => {
 
     showFilmDetails(films[0], footerNode);
   } else {
+    render(getProfileHTML(0), headerNode);
     render(getMenuHTML(getFilters(films)), mainNode, `afterbegin`);
     render(noMoviesHTML, filmsListSectionNode);
   }

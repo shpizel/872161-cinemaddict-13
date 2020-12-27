@@ -21,3 +21,13 @@ export const getRandomSlice = (list, length = null) => {
 };
 
 export const getFilledList = (size, fillFunction) => new Array(size).fill(0).map(fillFunction);
+
+export const capitalize = (string) => {
+  if (typeof string !== `string`) {
+    return ``;
+  }
+  if (string.length === 0) {
+    return ``;
+  }
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
