@@ -51,14 +51,19 @@ const showFilmsPager = (films, filmsListSectionNode, filmsListContainerNode) => 
 
 const showFilmDetails = (film, footerNode) => {
   render(getFilmDetailsHTML(film), footerNode, `beforeend`);
+  const filmDetailsNode = footerNode.querySelector(`.film-details`);
+  const closeFilmsDetails = () => {
+    if (filmDetailsNode) {
+      filmDetailsNode.remove();
+    }
+  };
 
+  const filmDetailsCloseButtonNode = filmDetailsNode.querySelector(`.film-details__close-btn`);
+  filmDetailsCloseButtonNode.addEventListener(`click`, closeFilmsDetails);
   const onKeyDownHandler = (evt) => {
     if (evt.key === `Escape` || evt.key === `Esc`) {
+      closeFilmsDetails();
       document.removeEventListener(`keydown`, onKeyDownHandler);
-      const filmDetailsNode = footerNode.querySelector(`.film-details`);
-      if (filmDetailsNode) {
-        filmDetailsNode.remove();
-      }
     }
   };
   document.addEventListener(`keydown`, onKeyDownHandler);
