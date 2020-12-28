@@ -1,4 +1,4 @@
-import {getFilledList, getRandomBool, getRandomChoice, getRandomNumber, getRandomSlice} from "../tools";
+import {getFilledList, getRandomBool, getRandomChoice, getRandomNumber, getRandomSlice} from "../utils";
 import {
   ACTORS,
   DESCRIPTIONS,

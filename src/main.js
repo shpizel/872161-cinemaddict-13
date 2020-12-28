@@ -1,4 +1,4 @@
-import {getFilledList, getRandomNumber} from './tools';
+import {getFilledList} from './utils';
 import {getProfileHTML} from './view/profile';
 import {getMenuHTML} from "./view/menu";
 import {getSortingHTML} from "./view/sorting";
@@ -13,39 +13,39 @@ import {getRandomFilm} from "./mock/film";
 import {getFilters} from "./mock/filters";
 import {getSortingItems} from "./mock/sorting";
 import {getFilmDetailsHTML} from "./view/films/details";
-
-
-const [FILMS_COUNT, FILMS_PER_PAGE, EXTRA_FILMS_COUNT] = [getRandomNumber(15, 20), 5, 2];
-
-const EXTRA_SECTIONS = [
-  {title: `Top rated`, comparator: (a, b) => b.rating - a.rating},
-  {title: `Most commented`, comparator: (a, b) => b.comments.length - a.comments.length}
-];
+import {
+  EXTRA_FILMS_COUNT,
+  FILMS_COUNT,
+  FILMS_PER_PAGE,
+  IS_AJAX_WORKS,
+  MESSAGES,
+  EXTRA_SECTIONS
+} from "./consts";
 
 const render = (html, target, where = `beforeend`) => target.insertAdjacentHTML(where, html);
 
 const showFilmsPager = (films, filmsListSectionNode, filmsListContainerNode) => {
   let cursor = 0;
-  let filmsPortion = [];
+  const renderNextPortion = () => {
+    const filmsPortion = films.slice(cursor, cursor + FILMS_PER_PAGE);
+    cursor += Math.min(FILMS_PER_PAGE, filmsPortion.length);
+    filmsPortion.forEach((film) => {
+      render(getFilmCardHTML(film), filmsListContainerNode);
+    });
+  };
 
-  filmsPortion = films.slice(cursor, cursor + FILMS_PER_PAGE);
-  cursor += Math.min(FILMS_PER_PAGE, filmsPortion.length);
-  filmsPortion.forEach((film) => {
-    render(getFilmCardHTML(film), filmsListContainerNode);
-  });
+  renderNextPortion();
   if (cursor < films.length) {
     render(getShowMoreButtonHTML(), filmsListSectionNode);
     const showMoreButtonNode = filmsListSectionNode.querySelector(`button.films-list__show-more`);
-    showMoreButtonNode.addEventListener(`click`, () => {
-      filmsPortion = films.slice(cursor, cursor + FILMS_PER_PAGE);
-      filmsPortion.forEach((film) => {
-        render(getFilmCardHTML(film), filmsListContainerNode);
-      });
-      cursor += Math.min(films.slice(cursor, cursor + FILMS_PER_PAGE).length, FILMS_PER_PAGE);
+    const showMoreButtonClickHandler = () => {
+      renderNextPortion();
       if (cursor >= films.length) {
+        showMoreButtonNode.removeEventListener(`click`, showMoreButtonClickHandler);
         showMoreButtonNode.remove();
       }
-    });
+    };
+    showMoreButtonNode.addEventListener(`click`, showMoreButtonClickHandler);
   }
 };
 
@@ -76,9 +76,9 @@ const mainNode = document.querySelector(`main`);
 const footerNode = document.querySelector(`footer`);
 const footerStatsNode = footerNode.querySelector(`.footer__statistics`);
 
-const allMoviesHTML = getFilmsListTitleHTML(`All movies. Upcoming`, true);
-const loadingHTML = getFilmsListTitleHTML(`Loading...`, false);
-const noMoviesHTML = getFilmsListTitleHTML(`There are no movies in our database`, false);
+const allMoviesHTML = getFilmsListTitleHTML(MESSAGES.allMovies, true);
+const loadingHTML = getFilmsListTitleHTML(MESSAGES.loading, false);
+const noMoviesHTML = getFilmsListTitleHTML(MESSAGES.noMovies, false);
 
 render(getMenuHTML(getFilters(films)), mainNode);
 const mainMenuNode = document.querySelector(`nav.main-navigation`);
@@ -93,7 +93,7 @@ const filmsListSectionNode = filmsSectionNode.querySelector(`section.films-list`
 render(loadingHTML, filmsListSectionNode);
 
 const main = () => {
-  if (getRandomNumber(0, 5) !== 0) {
+  if (IS_AJAX_WORKS) {
     films = getFilledList(FILMS_COUNT, getRandomFilm);
   }
 
@@ -110,13 +110,13 @@ const main = () => {
 
     showFilmsPager(films, filmsListSectionNode, filmsListContainerNode);
 
-    EXTRA_SECTIONS.forEach(({title, comparator}) => {
+    EXTRA_SECTIONS.forEach(({title}) => {
       render(getFilmsListSectionHTML(true), filmsSectionNode);
       const lastFilmsListExtraSectionNode = filmsSectionNode.querySelector(`section.films-list--extra:last-child`);
       render(getFilmsListTitleHTML(title), lastFilmsListExtraSectionNode);
       render(getFilmsListContainerHTML(), lastFilmsListExtraSectionNode);
       const lastFilmsListExtraContainerNode = lastFilmsListExtraSectionNode.querySelector(`div.films-list__container`);
-      films.sort(comparator).slice(0, EXTRA_FILMS_COUNT).forEach((film) => render(getFilmCardHTML(film), lastFilmsListExtraContainerNode));
+      getFilledList(EXTRA_FILMS_COUNT, getRandomFilm).forEach((film) => render(getFilmCardHTML(film), lastFilmsListExtraContainerNode));
     });
 
     showFilmDetails(films[0], footerNode);

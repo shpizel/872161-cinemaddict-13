@@ -1,5 +1,5 @@
 import {nanoid} from 'nanoid';
-import {getRandomChoice} from "../tools";
+import {getRandomChoice} from "../utils";
 import {getRandomDate} from "./tools";
 import {AUTHORS, EMOTIONS, MESSAGES} from "./comments-consts";
 
