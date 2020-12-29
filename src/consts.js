@@ -8,11 +8,12 @@ export const FILMS_PER_PAGE = 5;
 export const EXTRA_FILMS_COUNT = 2;
 export const IS_AJAX_WORKS = getRandomNumber(0, 5) !== 0;
 export const LOADING_TIMEOUT = 300;
+export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
 
-export const MESSAGES = {
-  allMovies: `All movies. Upcoming`,
-  loading: `Loading...`,
-  noMovies: `There are no movies in our database`
+export const Messages = {
+  ALL_MOVIES: `All movies. Upcoming`,
+  LOADING: `Loading...`,
+  NO_MOVIES: `There are no movies in our database`
 };
 
 export const EXTRA_SECTIONS = [

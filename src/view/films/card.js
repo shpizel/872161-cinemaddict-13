@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
+import {createElement} from "../../utils";
 
-export const getFilmCardHTML = (film) => {
+const getFilmCardHTML = (film) => {
   const duration = `${Math.round(film.duration / 60)}h` + ((film.runtime % 60) ? ` ${film.duration % 60}m` : ``);
   const year = dayjs(film.release_date).year();
-  return `
-<article class="film-card">
+  return `<article class="film-card">
   <h3 class="film-card__title">${film.title}</h3>
   <p class="film-card__rating">${film.rating}</p>
   <p class="film-card__info">
@@ -22,3 +22,26 @@ export const getFilmCardHTML = (film) => {
   </div>
 </article>`;
 };
+
+export default class FilmCard {
+  constructor(film) {
+    this._film = film;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return getFilmCardHTML(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
