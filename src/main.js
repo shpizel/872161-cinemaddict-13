@@ -19,7 +19,7 @@ import {
   FILMS_PER_PAGE,
   IS_AJAX_WORKS,
   MESSAGES,
-  EXTRA_SECTIONS
+  EXTRA_SECTIONS, LOADING_TIMEOUT
 } from "./consts";
 
 const render = (html, target, where = `beforeend`) => target.insertAdjacentHTML(where, html);
@@ -129,4 +129,4 @@ const main = () => {
   render(getMoviesInsideHTML(films.length), footerStatsNode);
 };
 
-setTimeout(main, 300);
+setTimeout(main, LOADING_TIMEOUT);

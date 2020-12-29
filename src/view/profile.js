@@ -3,8 +3,8 @@ import {PROFILE_RANKS} from "../consts";
 
 export const getProfileHTML = (filmsWatched) => {
   const getRank = (count) => {
-    const ranksFiltered = Object.entries(PROFILE_RANKS).filter(([, {start, end}]) => count >= start && count <= end);
-    return (ranksFiltered.length > 0) ? ranksFiltered[0][0] : ``;
+    const rank = Object.entries(PROFILE_RANKS).find(([, {start, end}]) => count >= start && count <= end);
+    return (rank) ? rank[0] : ``;
   };
   return `
 <section class="header__profile profile">
