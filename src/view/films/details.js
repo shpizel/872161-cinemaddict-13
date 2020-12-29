@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
+import {createElement} from "../../utils";
 
-export const getFilmDetailsHTML = (film) => {
+const getFilmDetailsHTML = (film) => {
   const duration = `${Math.round(film.duration / 60)}h` + ((film.runtime % 60) ? ` ${film.duration % 60}m` : ``);
 
-  return `
-<section class="film-details">
+  return `<section class="film-details">
   <form class="film-details__inner" action="" method="get">
     <div class="film-details__top-container">
       <div class="film-details__close">
@@ -134,3 +134,26 @@ export const getFilmDetailsHTML = (film) => {
 </section>
 `;
 };
+
+export default class FilmDetails {
+  constructor(film) {
+    this._film = film;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return getFilmDetailsHTML(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

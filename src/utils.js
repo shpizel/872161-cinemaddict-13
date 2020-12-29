@@ -26,5 +26,27 @@ export const capitalize = (string) => {
   if ((typeof string !== `string`) || (string.length === 0)) {
     return ``;
   }
-  return `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
+  return `${string.charAt(0).toUpperCase()}${string.slice(1).toLowerCase()}`;
+};
+
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement.firstChild;
+};
+
+export const RenderPosition = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
+};
+
+export const render = (element, container, place = RenderPosition.BEFOREEND) => {
+  switch (place) {
+    case RenderPosition.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case RenderPosition.BEFOREEND:
+      container.append(element);
+      break;
+  }
 };
