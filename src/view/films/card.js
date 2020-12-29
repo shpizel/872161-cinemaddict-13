@@ -1,18 +1,24 @@
-export const getFilmCardHTML = () => `
+import dayjs from "dayjs";
+
+export const getFilmCardHTML = (film) => {
+  const duration = `${Math.round(film.duration / 60)}h` + ((film.runtime % 60) ? ` ${film.duration % 60}m` : ``);
+  const year = dayjs(film.release_date).year();
+  return `
 <article class="film-card">
-  <h3 class="film-card__title">Santa Claus Conquers the Martians</h3>
-  <p class="film-card__rating">2.3</p>
+  <h3 class="film-card__title">${film.title}</h3>
+  <p class="film-card__rating">${film.rating}</p>
   <p class="film-card__info">
-    <span class="film-card__year">1964</span>
-    <span class="film-card__duration">1h 21m</span>
-    <span class="film-card__genre">Comedy</span>
+    <span class="film-card__year">${year}</span>
+    <span class="film-card__duration">${duration}</span>
+    ${film.genres.map((genre) => `<span class="film-card__genre">${genre}</span>`).join(`\n`)}
   </p>
-  <img src="./images/posters/santa-claus-conquers-the-martians.jpg" alt="" class="film-card__poster">
-  <p class="film-card__description">The Martians Momar ("Mom Martian") and Kimar ("King Martian") are worried that their children Girmar ("Girl Martian") and Bomar ("Boy Marti…</p>
-  <a class="film-card__comments">465 comments</a>
+  <img src="./images/posters/${film.poster}" alt="" class="film-card__poster">
+  <p class="film-card__description">${film.description.substr(0, 140)}…</p>
+  <a class="film-card__comments">${film.comments.length} comments</a>
   <div class="film-card__controls">
-    <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-    <button class="film-card__controls-item button film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-    <button class="film-card__controls-item button film-card__controls-item--favorite film-card__controls-item--active" type="button">Mark as favorite</button>
+    <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist${film.isInWatchlist ? ` film-card__controls-item--active` : ``}" type="button">Add to watchlist</button>
+    <button class="film-card__controls-item button film-card__controls-item--mark-as-watched${film.isAlreadyWatched ? ` film-card__controls-item--active` : ``}" type="button">Mark as watched</button>
+    <button class="film-card__controls-item button film-card__controls-item--favorite${film.isInFavourites ? ` film-card__controls-item--active` : ``}" type="button">Mark as favorite</button>
   </div>
 </article>`;
+};
