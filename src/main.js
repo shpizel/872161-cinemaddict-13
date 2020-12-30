@@ -65,13 +65,13 @@ const showFilmDetails = (film, footerNode) => {
 
   const filmDetailsCloseButtonNode = filmDetailsComponent.getElement().querySelector(`.film-details__close-btn`);
   filmDetailsCloseButtonNode.addEventListener(`click`, closeFilmsDetails);
-  const onKeyDownHandler = (evt) => {
+  const onEscKeyDown = (evt) => {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       closeFilmsDetails();
-      document.removeEventListener(`keydown`, onKeyDownHandler);
+      document.removeEventListener(`keydown`, onEscKeyDown);
     }
   };
-  document.addEventListener(`keydown`, onKeyDownHandler);
+  document.addEventListener(`keydown`, onEscKeyDown);
 };
 
 const renderFilmCard = (film, container) => {
