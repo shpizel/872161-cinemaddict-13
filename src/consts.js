@@ -1,4 +1,4 @@
-import {getRandomNumber} from "./utils";
+import {getRandomNumber} from "./utils/common";
 
 
 const FILMS_COUNT_MIN = 15;
@@ -29,3 +29,5 @@ export const PROFILE_RANKS = {
   'fan': makeInterval(11, 20),
   'movie buff': makeInterval(21)
 };
+
+export const FILMS_DESCRIPTION_MAX_LENGTH = 140;

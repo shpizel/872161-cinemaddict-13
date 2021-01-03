@@ -1,4 +1,4 @@
-import {getFilledList, render, RenderPosition} from './utils';
+import {remove, render, RenderPosition} from './utils/render';
 import Profile from './view/profile';
 import Menu from "./view/menu";
 import Sorting from "./view/sorting";
@@ -22,64 +22,58 @@ import {
   EXTRA_SECTIONS,
   LOADING_TIMEOUT, HIDE_OVERFLOW_CLASSNAME
 } from "./consts";
+import {
+  addClass,
+  getFilledList,
+  makeEscKeyDownHandler,
+  removeClass
+} from "./utils/common";
 
 const bodyNode = document.querySelector(`body`);
 
-const showFilmsPager = (films, filmsListSectionNode, filmsListContainerNode) => {
+const showFilmsPager = (films, filmsListSection, filmsListContainer) => {
   let cursor = 0;
+
   const renderNextPortion = () => {
     const filmsPortion = films.slice(cursor, cursor + FILMS_PER_PAGE);
     cursor += Math.min(FILMS_PER_PAGE, filmsPortion.length);
-    filmsPortion.forEach((film) => renderFilmCard(film, filmsListContainerNode));
+    filmsPortion.forEach((film) => renderFilmCard(film, filmsListContainer));
   };
 
   renderNextPortion();
+
   if (cursor < films.length) {
-    const showMoreButtonComponent = new ShowMoreButton();
-    render(showMoreButtonComponent.getElement(), filmsListSectionNode);
-    const showMoreButtonClickHandler = () => {
+    const showMoreButton = new ShowMoreButton();
+    render(showMoreButton, filmsListSection);
+    showMoreButton.setClickHandler(() => {
       renderNextPortion();
       if (cursor >= films.length) {
-        showMoreButtonComponent.getElement().removeEventListener(`click`, showMoreButtonClickHandler);
-        showMoreButtonComponent.getElement().remove();
-        showMoreButtonComponent.removeElement();
+        remove(showMoreButton);
       }
-    };
-    showMoreButtonComponent.getElement().addEventListener(`click`, showMoreButtonClickHandler);
+    });
   }
 };
 
 const showFilmDetails = (film, footerNode) => {
-  const filmDetailsComponent = new FilmDetails(film);
-  if (!bodyNode.classList.contains(HIDE_OVERFLOW_CLASSNAME)) {
-    bodyNode.classList.add(HIDE_OVERFLOW_CLASSNAME);
-  }
-  render(filmDetailsComponent.getElement(), footerNode, RenderPosition.BEFOREEND);
+  const filmDetails = new FilmDetails(film);
+  addClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
+  render(filmDetails, footerNode, RenderPosition.BEFOREEND);
   const closeFilmsDetails = () => {
-    filmDetailsComponent.getElement().remove();
-    filmDetailsComponent.removeElement();
-    if (bodyNode.classList.contains(HIDE_OVERFLOW_CLASSNAME)) {
-      bodyNode.classList.remove(HIDE_OVERFLOW_CLASSNAME);
-    }
+    remove(filmDetails);
+    removeClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
   };
-
-  const filmDetailsCloseButtonNode = filmDetailsComponent.getElement().querySelector(`.film-details__close-btn`);
-  filmDetailsCloseButtonNode.addEventListener(`click`, closeFilmsDetails);
-  const onEscKeyDown = (evt) => {
-    if (evt.key === `Escape` || evt.key === `Esc`) {
-      closeFilmsDetails();
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    }
-  };
-  document.addEventListener(`keydown`, onEscKeyDown);
+  const onEscKeyDownHandler = makeEscKeyDownHandler(closeFilmsDetails);
+  document.addEventListener(`keydown`, onEscKeyDownHandler);
+  filmDetails.setCloseHandler(() => {
+    closeFilmsDetails();
+    document.removeEventListener(`keydown`, onEscKeyDownHandler);
+  });
 };
 
 const renderFilmCard = (film, container) => {
   const filmCard = new FilmCard(film);
-  const filmCardNode = filmCard.getElement();
-  filmCardNode.querySelector(`.film-card__poster`).addEventListener(`click`, () => showFilmDetails(film, footerNode));
-  filmCardNode.querySelector(`.film-card__comments`).addEventListener(`click`, () => showFilmDetails(film, footerNode));
-  render(filmCardNode, container);
+  filmCard.setClickHandler(() => showFilmDetails(film, footerNode));
+  render(filmCard, container);
 };
 
 let films = [];
@@ -89,56 +83,54 @@ const mainNode = document.querySelector(`main`);
 const footerNode = document.querySelector(`footer`);
 const footerStatsNode = footerNode.querySelector(`.footer__statistics`);
 
-const allMoviesFilmsListTitleComponent = new FilmsListTitle(Messages.ALL_MOVIES, true);
-const loadingFilmsListTitleComponent = new FilmsListTitle(Messages.LOADING, false);
-const noMoviesFilmsListTitleComponent = new FilmsListTitle(Messages.NO_MOVIES, false);
+const allMoviesFilmsListTitle = new FilmsListTitle(Messages.ALL_MOVIES, true);
+const loadingFilmsListTitle = new FilmsListTitle(Messages.LOADING, false);
+const noMoviesFilmsListTitle = new FilmsListTitle(Messages.NO_MOVIES, false);
 
-let defaultMainMenuComponent = new Menu(getFilters(films));
-render(defaultMainMenuComponent.getElement(), mainNode);
+let defaultMainMenu = new Menu(getFilters(films));
+render(defaultMainMenu, mainNode);
 
-const filmsSectionComponent = new FilmsSection();
-const filmsSectionNode = filmsSectionComponent.getElement();
-render(filmsSectionNode, mainNode);
+const filmsSection = new FilmsSection();
+render(filmsSection, mainNode);
 
 const filmsListSection = new FilmsListSection();
-const filmsListSectionNode = filmsListSection.getElement();
-render(filmsListSectionNode, filmsSectionNode);
+render(filmsListSection, filmsSection);
 
-render(loadingFilmsListTitleComponent.getElement(), filmsListSectionNode);
+render(loadingFilmsListTitle, filmsListSection);
 
 const main = () => {
   if (IS_AJAX_WORKS) {
     films = getFilledList(FILMS_COUNT, getRandomFilm);
   }
 
-  filmsListSectionNode.innerHTML = ``;
-  defaultMainMenuComponent.getElement().remove();
-  defaultMainMenuComponent.removeElement();
+  filmsListSection.getElement().innerHTML = ``;
+  remove(defaultMainMenu);
   if (films.length > 0) {
-    render(new Profile(films.filter((film) => film.isAlreadyWatched).length).getElement(), headerNode);
-    render(new Sorting(getSortingItems()).getElement(), mainNode, RenderPosition.AFTERBEGIN);
-    render(new Menu(getFilters(films)).getElement(), mainNode, RenderPosition.AFTERBEGIN);
+    render(new Profile(films.filter((film) => film.isAlreadyWatched).length), headerNode);
+    render(new Sorting(getSortingItems()), mainNode, RenderPosition.AFTERBEGIN);
+    render(new Menu(getFilters(films)), mainNode, RenderPosition.AFTERBEGIN);
 
-    render(allMoviesFilmsListTitleComponent.getElement(), filmsListSectionNode);
-    render(new FilmsListContainer().getElement(), filmsListSectionNode);
-    const filmsListContainerNode = filmsListSectionNode.querySelector(`div.films-list__container`);
+    render(allMoviesFilmsListTitle, filmsListSection);
+    const filmsListContainer = new FilmsListContainer();
+    render(filmsListContainer, filmsListSection);
 
-    showFilmsPager(films, filmsListSectionNode, filmsListContainerNode);
+    showFilmsPager(films, filmsListSection, filmsListContainer);
 
     EXTRA_SECTIONS.forEach(({title}) => {
       const filmsListExtraSection = new FilmsListSection(true);
-      render(filmsListExtraSection.getElement(), filmsSectionNode);
-      render(new FilmsListTitle(title).getElement(), filmsListExtraSection.getElement());
+      render(filmsListExtraSection, filmsSection);
+      render(new FilmsListTitle(title), filmsListExtraSection);
+
       const filmsListExtraContainer = new FilmsListContainer();
-      render(filmsListExtraContainer.getElement(), filmsListExtraSection.getElement());
-      getFilledList(EXTRA_FILMS_COUNT, getRandomFilm).forEach((film) => renderFilmCard(film, filmsListExtraContainer.getElement()));
+      render(filmsListExtraContainer, filmsListExtraSection);
+      getFilledList(EXTRA_FILMS_COUNT, getRandomFilm).forEach((film) => renderFilmCard(film, filmsListExtraContainer));
     });
   } else {
-    render(new Profile(0).getElement(), headerNode);
-    render(new Menu(getFilters(films)).getElement(), mainNode, RenderPosition.AFTERBEGIN);
-    render(noMoviesFilmsListTitleComponent.getElement(), filmsListSectionNode);
+    render(new Profile(0), headerNode);
+    render(new Menu(getFilters(films)), mainNode, RenderPosition.AFTERBEGIN);
+    render(noMoviesFilmsListTitle, filmsListSection);
   }
-  render(new MoviesInside(films.length).getElement(), footerStatsNode);
+  render(new MoviesInside(films.length), footerStatsNode);
 };
 
 setTimeout(main, LOADING_TIMEOUT);

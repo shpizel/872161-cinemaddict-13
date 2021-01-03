@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
-import {createElement} from "../../utils";
+import Abstract from "../abstract";
+import {getFilmDuration} from "../../utils/film";
 
 const getFilmDetailsHTML = (film) => {
-  const duration = `${Math.round(film.duration / 60)}h` + ((film.runtime % 60) ? ` ${film.duration % 60}m` : ``);
+  const duration = getFilmDuration(film.duration);
 
   return `<section class="film-details">
   <form class="film-details__inner" action="" method="get">
@@ -135,25 +136,26 @@ const getFilmDetailsHTML = (film) => {
 `;
 };
 
-export default class FilmDetails {
+export default class FilmDetails extends Abstract {
   constructor(film) {
+    super();
+
     this._film = film;
-    this._element = null;
+
+    this._closeHandler = this._closeHandler.bind(this);
   }
 
   getTemplate() {
     return getFilmDetailsHTML(this._film);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _closeHandler(evt) {
+    evt.preventDefault();
+    this._callback.close();
   }
 
-  removeElement() {
-    this._element = null;
+  setCloseHandler(callback) {
+    this._callback.close = callback;
+    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeHandler);
   }
 }
