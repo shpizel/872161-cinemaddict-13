@@ -1,4 +1,3 @@
-import {getFilledList, getRandomBool, getRandomChoice, getRandomNumber, getRandomSlice} from "../utils";
 import {
   ACTORS,
   DESCRIPTIONS,
@@ -14,6 +13,7 @@ import {
 import {COMMENTS_COUNT_MIN, COMMENTS_COUNT_MAX} from "./comments-consts";
 import {getRandomComment} from "./comment";
 import {getRandomDate} from "./tools";
+import {getFilledList, getRandomBool, getRandomChoice, getRandomNumber, getRandomSlice} from "../utils/common";
 
 
 export const getRandomFilm = () => {

@@ -1,5 +1,6 @@
-import {capitalize, createElement} from "../utils";
 import {PROFILE_RANKS} from "../consts";
+import Abstract from "./abstract";
+import {capitalize} from "../utils/common";
 
 const getProfileHTML = (filmsWatched) => {
   const getRank = (count) => {
@@ -12,25 +13,14 @@ const getProfileHTML = (filmsWatched) => {
 </section>`;
 };
 
-export default class Profile {
+export default class Profile extends Abstract {
   constructor(filmsWatched) {
+    super();
+
     this._filmsWatched = filmsWatched;
-    this._element = null;
   }
 
   getTemplate() {
-    return getProfileHTML(this._filmsWatched).trim();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+    return getProfileHTML(this._filmsWatched);
   }
 }

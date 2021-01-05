@@ -29,24 +29,29 @@ export const capitalize = (string) => {
   return `${string.charAt(0).toUpperCase()}${string.slice(1).toLowerCase()}`;
 };
 
-export const createElement = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-  return newElement.firstChild;
-};
-
-export const RenderPosition = {
-  AFTERBEGIN: `afterbegin`,
-  BEFOREEND: `beforeend`
-};
-
-export const render = (element, container, place = RenderPosition.BEFOREEND) => {
-  switch (place) {
-    case RenderPosition.AFTERBEGIN:
-      container.prepend(element);
-      break;
-    case RenderPosition.BEFOREEND:
-      container.append(element);
-      break;
+export const addClass = (element, className) => {
+  if (!element.classList.contains(className)) {
+    element.classList.add(className);
   }
+};
+
+export const removeClass = (element, className) => {
+  if (element.classList.contains(className)) {
+    element.classList.remove(className);
+  }
+};
+
+export const makeEscKeyDownHandler = (callback) => {
+  const handler = (evt) => {
+    evt.preventDefault();
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      callback();
+      document.removeEventListener(`keydown`, handler);
+    }
+  };
+  return handler;
+};
+
+export const addDocumentEscKeyDownHandler = (callback) => {
+  document.addEventListener(`keydown`, makeEscKeyDownHandler(callback));
 };

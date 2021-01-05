@@ -1,4 +1,4 @@
-import {createElement} from "../utils";
+import Abstract from "./abstract";
 
 const getMenuHTML = (filters) => `<nav class="main-navigation">
   <div class="main-navigation__items">
@@ -9,25 +9,14 @@ ${filters.map(({name, isActive, counter}) => `
   <a href="#stats" class="main-navigation__additional">Stats</a>
 </nav>`;
 
-export default class Menu {
+export default class Menu extends Abstract {
   constructor(filters) {
+    super();
+
     this._filters = filters;
-    this._element = null;
   }
 
   getTemplate() {
-    return getMenuHTML(this._filters).trim();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+    return getMenuHTML(this._filters);
   }
 }
