@@ -3,7 +3,6 @@ import FilmsListContainer from "../view/films/list/container";
 import FilmsListTitle from "../view/films/list/title";
 import {EXTRA_FILMS_COUNT, ExtraSection, FILMS_PER_PAGE, Messages, SortType} from "../consts";
 import ShowMoreButton from "../view/show-more-button";
-import FilmDetails from "../view/films/details";
 import {
   commentsCountComparator,
   dateComparator,
