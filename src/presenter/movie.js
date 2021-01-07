@@ -91,7 +91,6 @@ export default class Movie {
     unsetHideOverflow();
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
     this._mode = Mode.DEFAULT;
-    this._changeMode();
   }
 
   _renderFilmDetails() {
