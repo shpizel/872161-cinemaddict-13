@@ -1,14 +1,16 @@
-const getSortingItem = (term, isActive = false) => {
+import {SortType} from "../consts";
+
+const makeSortItem = (sortType, isActive = false) => {
   return {
-    term,
+    sortType,
     isActive
   };
 };
 
 export const getSortingItems = () => {
   return [
-    getSortingItem(`default`, true),
-    getSortingItem(`date`),
-    getSortingItem(`rating`)
+    makeSortItem(SortType.DEFAULT, true),
+    makeSortItem(SortType.DATE),
+    makeSortItem(SortType.RATING)
   ];
 };
