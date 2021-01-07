@@ -111,7 +111,7 @@ export default class Movie {
 
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
-      this._renderFilmDetails();
+      this._closeFilmDetails();
     }
   }
 }
