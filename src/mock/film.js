@@ -1,3 +1,4 @@
+import {nanoid} from 'nanoid';
 import {
   ACTORS,
   DESCRIPTIONS,
@@ -17,6 +18,7 @@ import {getFilledList, getRandomBool, getRandomChoice, getRandomNumber, getRando
 
 
 export const getRandomFilm = () => {
+  const id = nanoid();
   const title = getRandomChoice(TITLES);
   const originalTitle = title;
   const poster = getRandomChoice(POSTERS);
@@ -36,6 +38,7 @@ export const getRandomFilm = () => {
   const isAlreadyWatched = getRandomBool();
   const isInFavourites = getRandomBool();
   return {
+    id,
     title,
     originalTitle,
     director,

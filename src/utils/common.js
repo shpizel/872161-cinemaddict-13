@@ -1,3 +1,6 @@
+import {HIDE_OVERFLOW_CLASSNAME} from "../consts";
+import dayjs from "dayjs";
+
 export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
 export const getRandomBool = () => Boolean(getRandomNumber(0, 1));
@@ -30,16 +33,21 @@ export const capitalize = (string) => {
 };
 
 export const addClass = (element, className) => {
-  if (!element.classList.contains(className)) {
-    element.classList.add(className);
-  }
+  element.classList.add(className);
 };
 
 export const removeClass = (element, className) => {
-  if (element.classList.contains(className)) {
-    element.classList.remove(className);
-  }
+  element.classList.remove(className);
 };
+
+export const bodyNode = document.querySelector(`body`);
+export const headerNode = document.querySelector(`header`);
+export const mainNode = document.querySelector(`main`);
+export const footerNode = document.querySelector(`footer`);
+export const footerStatsNode = footerNode.querySelector(`.footer__statistics`);
+
+export const setHideOverflow = () => addClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
+export const unsetHideOverflow = () => removeClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
 
 export const makeEscKeyDownHandler = (callback) => {
   const handler = (evt) => {
@@ -55,3 +63,24 @@ export const makeEscKeyDownHandler = (callback) => {
 export const addDocumentEscKeyDownHandler = (callback) => {
   document.addEventListener(`keydown`, makeEscKeyDownHandler(callback));
 };
+
+export const isNull = (value) => value === null;
+
+export const updateItem = (items, update) => {
+  const index = items.findIndex((item) => item.id === update.id);
+
+  if (index === -1) {
+    return items;
+  }
+  return [
+    ...items.slice(0, index),
+    update,
+    ...items.slice(index + 1)
+  ];
+};
+
+export const dateComparator = (a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate));
+
+export const ratingComparator = (a, b) => b.rating - a.rating;
+
+export const commentsCountComparator = (a, b) => b.comments.length - a.comments.length;

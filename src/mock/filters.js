@@ -1,3 +1,5 @@
+import {FilmFilter} from "../consts";
+
 const getFilter = (name, isActive, counter) => {
   return {
     name,
@@ -12,9 +14,9 @@ const getFilmsCountByField = (films, field) => {
 
 export const getFilters = (films) => {
   return [
-    getFilter(`All movies`, true, null),
-    getFilter(`Watchlist`, false, getFilmsCountByField(films, `isInWatchlist`)),
-    getFilter(`History`, false, getFilmsCountByField(films, `isAlreadyWatched`)),
-    getFilter(`Favourites`, false, getFilmsCountByField(films, `isInFavourites`)),
+    getFilter(FilmFilter.ALL, true, null),
+    getFilter(FilmFilter.WATCHLIST, false, getFilmsCountByField(films, `isInWatchlist`)),
+    getFilter(FilmFilter.WATCHED, false, getFilmsCountByField(films, `isAlreadyWatched`)),
+    getFilter(FilmFilter.FAVOURITE, false, getFilmsCountByField(films, `isInFavourites`)),
   ];
 };

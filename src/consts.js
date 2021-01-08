@@ -16,10 +16,28 @@ export const Messages = {
   NO_MOVIES: `There are no movies in our database`
 };
 
-export const EXTRA_SECTIONS = [
-  {title: `Top rated`},
-  {title: `Most commented`}
-];
+export const ExtraSection = {
+  TOP_RATED: `Top rated`,
+  MOST_COMMENTED: `Most commented`
+};
+
+export const SortType = {
+  DEFAULT: `default`,
+  DATE: `date`,
+  RATING: `rating`
+};
+
+export const FilmFilter = {
+  ALL: `All movies`,
+  WATCHED: `Watchlist`,
+  WATCHLIST: `History`,
+  FAVOURITE: `Favourites`
+};
+
+export const Mode = {
+  DEFAULT: `default`,
+  POPUP: `popup`
+};
 
 const makeInterval = (start = -Infinity, end = Infinity) => ({start, end});
 
