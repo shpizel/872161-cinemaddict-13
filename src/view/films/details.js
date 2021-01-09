@@ -135,7 +135,6 @@ export default class FilmDetails extends Smart {
     this._favouriteClickHandler = this._favouriteClickHandler.bind(this);
 
     this._emojiClickHandler = this._emojiClickHandler.bind(this);
-    this._commentFormSubmitHandler = this._commentFormSubmitHandler.bind(this);
     this._textareaInputHandler = this._textareaInputHandler.bind(this);
     this._textAreaKeydownHandler = this._textAreaKeydownHandler.bind(this);
   }
@@ -146,7 +145,6 @@ export default class FilmDetails extends Smart {
 
   setFormHandlers() {
     asList(this._emotionsRadioNodes).forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
-    this._formNode.addEventListener(`submit`, this._commentFormSubmitHandler);
     this._textareaNode.addEventListener(`input`, this._textareaInputHandler);
     this._textareaNode.addEventListener(`keydown`, this._textAreaKeydownHandler);
   }
@@ -194,10 +192,6 @@ export default class FilmDetails extends Smart {
     }
   }
 
-  _commentFormSubmitHandler() {
-
-  }
-
   _textareaInputHandler(evt) {
     const writtenText = evt.target.value;
     this.updateData({writtenText}, true);
@@ -222,19 +216,19 @@ export default class FilmDetails extends Smart {
   _watchlistClickHandler(evt) {
     const isInWatchlist = evt.target.checked;
     this.updateData({isInWatchlist});
-    this._updateHandler(FilmDetails.parseDataToFilm(this._data), `watchlist`);
+    this._updateHandler(FilmDetails.parseDataToFilm(this._data));
   }
 
   _watchedClickHandler(evt) {
     const isAlreadyWatched = evt.target.checked;
     this.updateData({isAlreadyWatched});
-    this._updateHandler(FilmDetails.parseDataToFilm(this._data), `watched`);
+    this._updateHandler(FilmDetails.parseDataToFilm(this._data));
   }
 
   _favouriteClickHandler(evt) {
     const isInFavourites = evt.target.checked;
     this.updateData({isInFavourites});
-    this._updateHandler(FilmDetails.parseDataToFilm(this._data), `favourite`);
+    this._updateHandler(FilmDetails.parseDataToFilm(this._data));
   }
 
   setWatchlistClickHandler(callback) {
