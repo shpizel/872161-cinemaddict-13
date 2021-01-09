@@ -1,7 +1,8 @@
 import {nanoid} from 'nanoid';
 import {getRandomDate} from "./tools";
-import {AUTHORS, EMOTIONS, MESSAGES} from "./comments-consts";
+import {AUTHORS, MESSAGES} from "./comments-consts";
 import {getRandomChoice} from "../utils/common";
+import {EMOTIONS} from "../consts";
 
 
 export const getRandomComment = () => {

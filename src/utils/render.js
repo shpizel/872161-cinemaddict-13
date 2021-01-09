@@ -1,4 +1,6 @@
 import Abstract from "../view/abstract";
+import {addClass, bodyNode, isNull, removeClass} from "./common";
+import {HIDE_OVERFLOW_CLASSNAME} from "../consts";
 
 export const RenderPosition = {
   AFTERBEGIN: `afterbegin`,
@@ -41,7 +43,7 @@ export const replace = (newChild, oldChild) => {
 
   const parent = oldChild.parentElement;
 
-  if (parent === null || oldChild === null || newChild === null) {
+  if (isNull(parent) || isNull(oldChild) || isNull(newChild)) {
     throw new Error(`Can't replace unexisting elements`);
   }
 
@@ -56,3 +58,5 @@ export const remove = (component) => {
   component.getElement().remove();
   component.removeElement();
 };
+export const setHideOverflow = () => addClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
+export const unsetHideOverflow = () => removeClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);

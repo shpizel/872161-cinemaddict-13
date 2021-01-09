@@ -1,6 +1,11 @@
-import {remove, render, RenderPosition, replace} from "../utils/render";
+import {remove, render, RenderPosition, replace, setHideOverflow, unsetHideOverflow} from "../utils/render";
 import FilmCard from "../view/films/card";
-import {footerNode, isNull, makeEscKeyDownHandler, setHideOverflow, unsetHideOverflow} from "../utils/common";
+import {
+  equals,
+  footerNode,
+  isNull,
+  makeEscKeyDownHandler, mergeObjects
+} from "../utils/common";
 import {Mode} from "../consts";
 import FilmDetails from "../view/films/details";
 
@@ -34,6 +39,7 @@ export default class Movie {
     this._closeFilmDetails = this._closeFilmDetails.bind(this);
     this._escKeyDownHandler = makeEscKeyDownHandler(this._closeFilmDetails);
     this._renderFilmDetails = this._renderFilmDetails.bind(this);
+    this._filmUpdateHandler = this._filmUpdateHandler.bind(this);
   }
 
   init(film) {
@@ -42,10 +48,8 @@ export default class Movie {
     this._prevFilmDetails = this._filmDetails;
 
     this._filmCard = new FilmCard(this._film);
-    this._filmDetails = new FilmDetails(this._film);
+    this._filmDetails = new FilmDetails(this._film, this._filmUpdateHandler);
     this._initFilmCardHandlers();
-    this._initFilmDetailsHandlers();
-
     if (isNull(this._prevFilmCard) || isNull(this._prevFilmDetails)) {
       render(this._filmCard, this._filmsContainer);
       return;
@@ -53,11 +57,16 @@ export default class Movie {
 
     replace(this._filmCard, this._prevFilmCard);
 
-    if (this._mode === Mode.POPUP) {
+    if (equals(this._mode, Mode.POPUP)) {
+      this._initFilmDetailsHandlers();
       replace(this._filmDetails, this._prevFilmDetails);
     }
     remove(this._prevFilmCard);
     remove(this._prevFilmDetails);
+  }
+
+  _filmUpdateHandler(film) {
+    this._changeData(film);
   }
 
   _initFilmCardHandlers() {
@@ -72,18 +81,19 @@ export default class Movie {
     this._filmDetails.setWatchedClickHandler(this._handleWatchedClick);
     this._filmDetails.setFavouriteClickHandler(this._handleFavouriteClick);
     this._filmDetails.setCloseHandler(this._closeFilmDetails);
+    this._filmDetails.setFormHandlers();
   }
 
   _handleFavouriteClick() {
-    this._changeData(Object.assign({}, this._film, {isInFavourites: !this._film.isInFavourites}));
+    this._changeData(mergeObjects(this._film, {isInFavourites: !this._film.isInFavourites}));
   }
 
   _handleWatchedClick() {
-    this._changeData(Object.assign({}, this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
+    this._changeData(mergeObjects(this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
   }
 
   _handleWatchlistClick() {
-    this._changeData(Object.assign({}, this._film, {isInWatchlist: !this._film.isInWatchlist}));
+    this._changeData(mergeObjects(this._film, {isInWatchlist: !this._film.isInWatchlist}));
   }
 
   _closeFilmDetails() {
@@ -95,7 +105,6 @@ export default class Movie {
 
   _renderFilmDetails() {
     this._initFilmDetailsHandlers();
-
     document.addEventListener(`keydown`, this._escKeyDownHandler);
     setHideOverflow();
     render(this._filmDetails, footerNode, RenderPosition.BEFOREEND);

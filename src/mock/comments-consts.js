@@ -6,13 +6,6 @@ export const AUTHORS = [
   `Аня`,
 ];
 
-export const EMOTIONS = [
-  `smile`,
-  `angry`,
-  `puke`,
-  `sleeping`,
-];
-
 export const MESSAGES = [
   `Супер фильм`,
   `Уснул...`,

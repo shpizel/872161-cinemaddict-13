@@ -5,7 +5,7 @@ import {EXTRA_FILMS_COUNT, ExtraSection, FILMS_PER_PAGE, Messages, SortType} fro
 import ShowMoreButton from "../view/show-more-button";
 import {
   commentsCountComparator,
-  dateComparator,
+  dateComparator, equals,
   isNull,
   ratingComparator,
   updateItem
@@ -220,7 +220,7 @@ export default class MovieList {
   }
 
   _handleSortTypeChange(sortType) {
-    if (this._currentSortType === sortType) {
+    if (equals(this._currentSortType, sortType)) {
       return;
     }
 

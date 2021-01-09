@@ -25,7 +25,7 @@ export default class Sorting extends Abstract {
   _sortTypeChangeHandler(evt) {
     evt.preventDefault();
     const {target: currentSortButton} = evt;
-    const activeSortButton = this.getElement().querySelector(`.${SORT_BUTTON_ACTIVE_CLASS}`);
+    const activeSortButton = this.querySelector(`.${SORT_BUTTON_ACTIVE_CLASS}`);
     if (currentSortButton.tagName !== `A` || !activeSortButton) {
       return;
     }

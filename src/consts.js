@@ -1,6 +1,7 @@
 import {getRandomNumber} from "./utils/common";
 
 
+export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
 const FILMS_COUNT_MIN = 15;
 const FILMS_COUNT_MAX = 20;
 export const FILMS_COUNT = getRandomNumber(FILMS_COUNT_MIN, FILMS_COUNT_MAX);
@@ -8,7 +9,7 @@ export const FILMS_PER_PAGE = 5;
 export const EXTRA_FILMS_COUNT = 2;
 export const IS_AJAX_WORKS = getRandomNumber(0, 5) !== 0;
 export const LOADING_TIMEOUT = 300;
-export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
+
 
 export const Messages = {
   ALL_MOVIES: `All movies. Upcoming`,
@@ -49,3 +50,31 @@ export const PROFILE_RANKS = {
 };
 
 export const FILMS_DESCRIPTION_MAX_LENGTH = 140;
+
+export const BLANK_FILM = {
+  id: ``,
+  title: ``,
+  originalTitle: ``,
+  director: ``,
+  writers: ``,
+  releaseDate: ``,
+  duration: 0,
+  ageRating: 0,
+  rating: 0.0,
+  genres: [],
+  country: ``,
+  actors: [],
+  poster: ``,
+  description: ``,
+  comments: [],
+  isInWatchlist: null,
+  isAlreadyWatched: null,
+  isInFavourites: null
+};
+
+export const EMOTIONS = [
+  `smile`,
+  `angry`,
+  `puke`,
+  `sleeping`,
+];
