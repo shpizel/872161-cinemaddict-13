@@ -78,3 +78,9 @@ export const EMOTIONS = [
   `puke`,
   `sleeping`,
 ];
+
+export const CATEGORIES = {
+  WATCHLIST: `watchlist`,
+  WATCHED: `watched`,
+  FAVOURITES: `favourites`
+};

@@ -1,12 +1,11 @@
 import {remove, render, RenderPosition, replace, setHideOverflow, unsetHideOverflow} from "../utils/render";
 import FilmCard from "../view/films/card";
 import {
-  equals,
   footerNode,
   isNull,
   makeEscKeyDownHandler, mergeObjects
 } from "../utils/common";
-import {Mode} from "../consts";
+import {CATEGORIES, Mode} from "../consts";
 import FilmDetails from "../view/films/details";
 
 export default class Movie {
@@ -45,28 +44,36 @@ export default class Movie {
   init(film) {
     this._film = film;
     this._prevFilmCard = this._filmCard;
-    this._prevFilmDetails = this._filmDetails;
-
     this._filmCard = new FilmCard(this._film);
-    this._filmDetails = new FilmDetails(this._film, this._filmUpdateHandler);
     this._initFilmCardHandlers();
-    if (isNull(this._prevFilmCard) || isNull(this._prevFilmDetails)) {
+
+    if (!this._filmDetails) {
+      this._filmDetails = new FilmDetails(this._film, this._filmUpdateHandler);
+      this._filmDetails.setCloseHandler(this._closeFilmDetails);
+    } else {
+      this._filmDetails.updateData(this._film);
+    }
+
+    if (isNull(this._prevFilmCard)) {
       render(this._filmCard, this._filmsContainer);
       return;
     }
 
     replace(this._filmCard, this._prevFilmCard);
-
-    if (equals(this._mode, Mode.POPUP)) {
-      this._initFilmDetailsHandlers();
-      replace(this._filmDetails, this._prevFilmDetails);
-    }
     remove(this._prevFilmCard);
-    remove(this._prevFilmDetails);
   }
 
-  _filmUpdateHandler(film) {
-    this._changeData(film);
+  _filmUpdateHandler(reason) {
+    const map = {
+      [CATEGORIES.FAVOURITES]: this._handleFavouriteClick,
+      [CATEGORIES.WATCHED]: this._handleWatchedClick,
+      [CATEGORIES.WATCHLIST]: this._handleWatchlistClick
+    };
+    if (map.hasOwnProperty(reason)) {
+      map[reason]();
+    } else {
+      throw new Error(`Invalid reason: ${reason}`);
+    }
   }
 
   _initFilmCardHandlers() {
@@ -74,14 +81,6 @@ export default class Movie {
     this._filmCard.setFavouriteClickHandler(this._handleFavouriteClick);
     this._filmCard.setWatchedClickHandler(this._handleWatchedClick);
     this._filmCard.setWatchlistClickHandler(this._handleWatchlistClick);
-  }
-
-  _initFilmDetailsHandlers() {
-    this._filmDetails.setWatchlistClickHandler(this._handleWatchlistClick);
-    this._filmDetails.setWatchedClickHandler(this._handleWatchedClick);
-    this._filmDetails.setFavouriteClickHandler(this._handleFavouriteClick);
-    this._filmDetails.setCloseHandler(this._closeFilmDetails);
-    this._filmDetails.setFormHandlers();
   }
 
   _handleFavouriteClick() {
@@ -104,7 +103,7 @@ export default class Movie {
   }
 
   _renderFilmDetails() {
-    this._initFilmDetailsHandlers();
+    this._filmDetails.restoreHandlers();
     document.addEventListener(`keydown`, this._escKeyDownHandler);
     setHideOverflow();
     render(this._filmDetails, footerNode, RenderPosition.BEFOREEND);

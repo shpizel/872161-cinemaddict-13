@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
-import {BLANK_FILM, EMOTIONS} from "../../consts";
-import {asList, cloneObject, equals, mergeObjects, isNull} from "../../utils/common";
+import {BLANK_FILM, CATEGORIES, EMOTIONS} from "../../consts";
+import {asList, cloneObject, equals, mergeObjects, isNull, formatDate} from "../../utils/common";
 
 const getFilmDetailsHTML = (film) => {
   const duration = getFilmDuration(film.duration);
@@ -95,7 +95,7 @@ const getFilmDetailsHTML = (film) => {
     <p class="film-details__comment-text">${comment.comment}</p>
     <p class="film-details__comment-info">
       <span class="film-details__comment-author">${comment.author}</span>
-      <span class="film-details__comment-day">${dayjs(comment.date).format(`YYYY/MM/DD HH:mm`)}</span>
+      <span class="film-details__comment-day">${formatDate(comment.date)}</span>
       <button class="film-details__comment-delete">Delete</button>
     </p>
   </div>
@@ -137,13 +137,18 @@ export default class FilmDetails extends Smart {
     this._emojiClickHandler = this._emojiClickHandler.bind(this);
     this._textareaInputHandler = this._textareaInputHandler.bind(this);
     this._textAreaKeydownHandler = this._textAreaKeydownHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
   getTemplate() {
     return getFilmDetailsHTML(this._data);
   }
 
-  setFormHandlers() {
+  _setInnerHandlers() {
+    this._watchlistButtonNode.addEventListener(`click`, this._watchlistClickHandler);
+    this._watchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
+    this._favouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
     asList(this._emotionsRadioNodes).forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
     this._textareaNode.addEventListener(`input`, this._textareaInputHandler);
     this._textareaNode.addEventListener(`keydown`, this._textAreaKeydownHandler);
@@ -166,7 +171,7 @@ export default class FilmDetails extends Smart {
     this._watchlistButtonNode.addEventListener(`click`, this._watchlistClickHandler);
     this._watchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
     this._favouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
-    this.setFormHandlers();
+    this._setInnerHandlers();
   }
 
   static parseFilmToData(film) {
@@ -214,36 +219,21 @@ export default class FilmDetails extends Smart {
   }
 
   _watchlistClickHandler(evt) {
-    const isInWatchlist = evt.target.checked;
-    this.updateData({isInWatchlist});
-    this._updateHandler(FilmDetails.parseDataToFilm(this._data));
+    evt.preventDefault();
+    this._data.isInWatchlist = !this._data.isInWatchlist;
+    this._updateHandler(CATEGORIES.WATCHLIST);
   }
 
   _watchedClickHandler(evt) {
-    const isAlreadyWatched = evt.target.checked;
-    this.updateData({isAlreadyWatched});
-    this._updateHandler(FilmDetails.parseDataToFilm(this._data));
+    evt.preventDefault();
+    this._data.isAlreadyWatched = !this._data.isAlreadyWatched;
+    this._updateHandler(CATEGORIES.WATCHED);
   }
 
   _favouriteClickHandler(evt) {
-    const isInFavourites = evt.target.checked;
-    this.updateData({isInFavourites});
-    this._updateHandler(FilmDetails.parseDataToFilm(this._data));
-  }
-
-  setWatchlistClickHandler(callback) {
-    this._callback.watchlistClick = callback;
-    this._watchlistButtonNode.addEventListener(`click`, this._watchlistClickHandler);
-  }
-
-  setWatchedClickHandler(callback) {
-    this._callback.watchedClick = callback;
-    this._watchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
-  }
-
-  setFavouriteClickHandler(callback) {
-    this._callback.favoriteClick = callback;
-    this._favouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
+    evt.preventDefault();
+    this._data.isInFavourites = !this._data.isInFavourites;
+    this._updateHandler(CATEGORIES.FAVOURITES);
   }
 
   setCloseHandler(callback) {

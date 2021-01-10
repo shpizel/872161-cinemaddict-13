@@ -88,4 +88,40 @@ export const commentsCountComparator = (a, b) => b.comments.length - a.comments.
 
 export const asList = (data) => Array.from(data);
 
+export const formatDate = (date) => {
+  const dt = dayjs(date);
+  const now = dayjs();
+  const diff = {
+    m: Math.abs(dt.diff(now, `m`)),
+    h: Math.abs(dt.diff(now, `h`)),
+    d: Math.abs(dt.diff(now, `d`)),
+    M: Math.abs(dt.diff(now, `M`)),
+    y: Math.abs(dt.diff(now, `y`))
+  };
+  if (diff.m < 1) {
+    return `now`;
+  } else if (diff.m >= 1 && diff.m < 5) {
+    return `a few minutes ago`;
+  } else if (diff.m >= 5 && diff.m < 60) {
+    return `${Math.floor(diff.m)} minutes ago`;
+  } else if (equals(diff.h, 1)) {
+    return `1 hour ago`;
+  } else if (diff.h > 1 && diff.h < 24) {
+    return `${Math.floor(diff.h)} hours ago`;
+  } else if (equals(diff.d, 1)) {
+    return `1 day ago`;
+  } else if (diff.d > 1 && diff.M < 1) {
+    return `${Math.floor(diff.d)} days ago`;
+  } else if (equals(diff.M, 1)) {
+    return `1 month ago`;
+  } else if (diff.M > 1 && diff.y < 1) {
+    return `${Math.floor(diff.M)} month ago`;
+  } else if (equals(diff.y, 1)) {
+    return `1 year ago`;
+  } else if (diff.y > 1) {
+    return `${Math.floor(diff.y)} years ago`;
+  }
+  return dt.format(`YYYY/MM/DD HH:mm`);
+};
 
+export const ternary = (cond, yes, no) => (cond) ? yes : no;
