@@ -3,7 +3,7 @@ import FilmCard from "../view/films/card";
 import {
   footerNode,
   isNull,
-  makeEscKeyDownHandler, mergeObjects
+  makeEscKeyDownHandler
 } from "../utils/common";
 import {CATEGORIES, Mode} from "../consts";
 import FilmDetails from "../view/films/details";
@@ -84,15 +84,15 @@ export default class Movie {
   }
 
   _handleFavouriteClick() {
-    this._changeData(mergeObjects(this._film, {isInFavourites: !this._film.isInFavourites}));
+    this._changeData(Object.assign({}, this._film, {isInFavourites: !this._film.isInFavourites}));
   }
 
   _handleWatchedClick() {
-    this._changeData(mergeObjects(this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
+    this._changeData(Object.assign({}, this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
   }
 
   _handleWatchlistClick() {
-    this._changeData(mergeObjects(this._film, {isInWatchlist: !this._film.isInWatchlist}));
+    this._changeData(Object.assign({}, this._film, {isInWatchlist: !this._film.isInWatchlist}));
   }
 
   _closeFilmDetails() {

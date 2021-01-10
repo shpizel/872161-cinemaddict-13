@@ -1,5 +1,4 @@
 import Abstract from "./abstract";
-import {mergeObjects} from "../utils/common";
 
 export default class Smart extends Abstract {
   constructor() {
@@ -7,14 +6,14 @@ export default class Smart extends Abstract {
     this._data = {};
   }
 
-  updateData(update, justDataUpdate) {
+  updateData(update, updateOnly) {
     if (!update) {
       return;
     }
 
-    this._data = mergeObjects(this._data, update);
+    this._data = Object.assign({}, this._data, update);
 
-    if (justDataUpdate) {
+    if (updateOnly) {
       return;
     }
 

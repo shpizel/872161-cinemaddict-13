@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
 
-export const equals = (one, two) => one === two;
-
 export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
 export const getRandomBool = () => Boolean(getRandomNumber(0, 1));
@@ -27,7 +25,7 @@ export const getRandomSlice = (list, length = null) => {
 export const getFilledList = (size, fillFunction) => new Array(size).fill(0).map(fillFunction);
 
 export const capitalize = (string) => {
-  if (!equals(typeof string, `string`) || equals(string.length, 0)) {
+  if ((typeof string !== `string`) || (string.length === 0)) {
     return ``;
   }
   return `${string.charAt(0).toUpperCase()}${string.slice(1).toLowerCase()}`;
@@ -62,14 +60,15 @@ export const addDocumentEscKeyDownHandler = (callback) => {
   document.addEventListener(`keydown`, makeEscKeyDownHandler(callback));
 };
 
-export const isNull = (value) => equals(value, null);
+export const isNull = (value) => value === null;
 
 export const updateItem = (items, update) => {
-  const index = items.findIndex((item) => equals(item.id, update.id));
+  const index = items.findIndex((item) => item.id === update.id);
 
-  if (equals(index, -1)) {
+  if (index === -1) {
     return items;
   }
+
   return [
     ...items.slice(0, index),
     update,
@@ -77,51 +76,38 @@ export const updateItem = (items, update) => {
   ];
 };
 
-export const mergeObjects = (base, patch) => Object.assign({}, base, patch);
-export const cloneObject = (object) => Object.assign({}, object);
-
-export const dateComparator = (a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate));
-
+export const releaseDateComparator = (a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate));
 export const ratingComparator = (a, b) => b.rating - a.rating;
 
 export const commentsCountComparator = (a, b) => b.comments.length - a.comments.length;
 
-export const asList = (data) => Array.from(data);
-
 export const formatDate = (date) => {
   const dt = dayjs(date);
   const now = dayjs();
-  const diff = {
-    m: Math.abs(dt.diff(now, `m`)),
-    h: Math.abs(dt.diff(now, `h`)),
-    d: Math.abs(dt.diff(now, `d`)),
-    M: Math.abs(dt.diff(now, `M`)),
-    y: Math.abs(dt.diff(now, `y`))
-  };
-  if (diff.m < 1) {
-    return `now`;
-  } else if (diff.m >= 1 && diff.m < 5) {
-    return `a few minutes ago`;
-  } else if (diff.m >= 5 && diff.m < 60) {
-    return `${Math.floor(diff.m)} minutes ago`;
-  } else if (equals(diff.h, 1)) {
-    return `1 hour ago`;
-  } else if (diff.h > 1 && diff.h < 24) {
-    return `${Math.floor(diff.h)} hours ago`;
-  } else if (equals(diff.d, 1)) {
-    return `1 day ago`;
-  } else if (diff.d > 1 && diff.M < 1) {
-    return `${Math.floor(diff.d)} days ago`;
-  } else if (equals(diff.M, 1)) {
-    return `1 month ago`;
-  } else if (diff.M > 1 && diff.y < 1) {
-    return `${Math.floor(diff.M)} month ago`;
-  } else if (equals(diff.y, 1)) {
-    return `1 year ago`;
-  } else if (diff.y > 1) {
-    return `${Math.floor(diff.y)} years ago`;
-  }
-  return dt.format(`YYYY/MM/DD HH:mm`);
-};
+  const minutes = Math.abs(dt.diff(now, `m`));
+  const hours = Math.abs(dt.diff(now, `h`));
+  const days = Math.abs(dt.diff(now, `d`));
+  const months = Math.abs(dt.diff(now, `M`));
+  const years = Math.abs(dt.diff(now, `y`));
 
-export const ternary = (cond, yes, no) => (cond) ? yes : no;
+  if (minutes < 1) {
+    return `now`;
+  }
+  if (minutes < 60) {
+    return `${(minutes < 5) ? `A few` : minutes} minutes ago`;
+  }
+
+  if (hours < 24) {
+    return `${hours} hour${(hours > 1) ? `s` : ``} ago`;
+  }
+
+  if (months < 1) {
+    return `${days} day${(days > 1) ? `s` : ``} ago`;
+  }
+
+  if (years < 1) {
+    return `${months} month${(months > 1) ? `s` : ``} ago`;
+  }
+
+  return `${years} year${(years > 1) ? `s` : ``} ago`;
+};

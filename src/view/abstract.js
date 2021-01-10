@@ -1,9 +1,9 @@
 import {createElement} from "../utils/render";
-import {equals, isNull} from "../utils/common";
+import {isNull} from "../utils/common";
 
 export default class Abstract {
   constructor() {
-    if (equals(new.target, Abstract)) {
+    if (new.target === Abstract) {
       throw new Error(`Can't instantiate Abstract, only concrete one.`);
     }
 

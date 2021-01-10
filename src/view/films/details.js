@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
+import {nanoid} from "nanoid";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
 import {BLANK_FILM, CATEGORIES, EMOTIONS} from "../../consts";
-import {asList, cloneObject, equals, mergeObjects, isNull, formatDate} from "../../utils/common";
+import {isNull, formatDate} from "../../utils/common";
 
 const getFilmDetailsHTML = (film) => {
   const duration = getFilmDuration(film.duration);
@@ -16,7 +17,6 @@ const getFilmDetailsHTML = (film) => {
       <div class="film-details__info-wrap">
         <div class="film-details__poster">
           <img class="film-details__poster-img" src="./images/posters/${film.poster}" alt="">
-
           <p class="film-details__age">${film.ageRating}+</p>
         </div>
 
@@ -111,7 +111,7 @@ const getFilmDetailsHTML = (film) => {
 
           <div class="film-details__emoji-list">
             ${EMOTIONS.map((emotion) => `
-<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}"${equals(film.activeEmotion, emotion) ? ` checked` : ``}>
+<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}"${(film.activeEmotion === emotion) ? ` checked` : ``}>
 <label class="film-details__emoji-label" for="emoji-${emotion}">
   <img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">
 </label>`).join(`\n`)}
@@ -149,7 +149,7 @@ export default class FilmDetails extends Smart {
     this._watchlistButtonNode.addEventListener(`click`, this._watchlistClickHandler);
     this._watchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
     this._favouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
-    asList(this._emotionsRadioNodes).forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
+    Array.from(this._emotionsRadioNodes).forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
     this._textareaNode.addEventListener(`input`, this._textareaInputHandler);
     this._textareaNode.addEventListener(`keydown`, this._textAreaKeydownHandler);
   }
@@ -158,7 +158,7 @@ export default class FilmDetails extends Smart {
     const scrollManagerEnabled = update && !justDataUpdate;
     if (scrollManagerEnabled) {
       const scrollTop = this.getElement().scrollTop;
-      update = mergeObjects(update, {scrollTop});
+      update = Object.assign({}, update, {scrollTop});
     }
     super.updateData(update, justDataUpdate);
     if (scrollManagerEnabled) {
@@ -175,7 +175,7 @@ export default class FilmDetails extends Smart {
   }
 
   static parseFilmToData(film) {
-    return mergeObjects(film, {
+    return Object.assign({}, film, {
       activeEmotion: null,
       writtenText: ``,
       scrollTop: 0,
@@ -183,7 +183,7 @@ export default class FilmDetails extends Smart {
   }
 
   static parseDataToFilm(data) {
-    data = cloneObject(data);
+    data = Object.assign({}, data);
     delete data.activeEmotion;
     delete data.writtenText;
     delete data.scrollTop;
@@ -192,7 +192,7 @@ export default class FilmDetails extends Smart {
 
   _emojiClickHandler(evt) {
     const activeEmotion = evt.target.value;
-    if (!equals(activeEmotion, this._data.activeEmotion)) {
+    if (activeEmotion !== this._data.activeEmotion) {
       this.updateData({activeEmotion});
     }
   }
@@ -203,12 +203,18 @@ export default class FilmDetails extends Smart {
   }
 
   _textAreaKeydownHandler(evt) {
-    if ((evt.ctrlKey || evt.metaKey) && equals(evt.key, `Enter`)) {
+    if ((evt.ctrlKey || evt.metaKey) && (evt.key === `Enter`)) {
       evt.preventDefault();
       if (this._data.activeEmotion && this._data.writtenText) {
         const newComments = [...this._data.comments];
-        newComments.push({});
-        this.updateData();
+        newComments.push({
+          id: nanoid(),
+          author: `shpizel`,
+          comment: this._data.writtenText,
+          date: dayjs(),
+          emotion: this._data.activeEmotion
+        });
+        this.updateData({comments: newComments, activeEmotion: null, writtenText: ``});
       }
     }
   }
@@ -220,19 +226,16 @@ export default class FilmDetails extends Smart {
 
   _watchlistClickHandler(evt) {
     evt.preventDefault();
-    this._data.isInWatchlist = !this._data.isInWatchlist;
     this._updateHandler(CATEGORIES.WATCHLIST);
   }
 
   _watchedClickHandler(evt) {
     evt.preventDefault();
-    this._data.isAlreadyWatched = !this._data.isAlreadyWatched;
     this._updateHandler(CATEGORIES.WATCHED);
   }
 
   _favouriteClickHandler(evt) {
     evt.preventDefault();
-    this._data.isInFavourites = !this._data.isInFavourites;
     this._updateHandler(CATEGORIES.FAVOURITES);
   }
 
@@ -247,10 +250,6 @@ export default class FilmDetails extends Smart {
 
   get _textareaNode() {
     return this.querySelector(`textarea.film-details__comment-input`);
-  }
-
-  get _formNode() {
-    return this.querySelector(`form.film-details__inner`);
   }
 
   get _watchedButtonNode() {
