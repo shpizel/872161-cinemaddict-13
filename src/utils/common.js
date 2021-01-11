@@ -1,4 +1,3 @@
-import {HIDE_OVERFLOW_CLASSNAME} from "../consts";
 import dayjs from "dayjs";
 
 export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
@@ -46,13 +45,10 @@ export const mainNode = document.querySelector(`main`);
 export const footerNode = document.querySelector(`footer`);
 export const footerStatsNode = footerNode.querySelector(`.footer__statistics`);
 
-export const setHideOverflow = () => addClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
-export const unsetHideOverflow = () => removeClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
-
 export const makeEscKeyDownHandler = (callback) => {
   const handler = (evt) => {
-    evt.preventDefault();
-    if (evt.key === `Escape` || evt.key === `Esc`) {
+    if ([`Escape`, `Esc`].includes(evt.key)) {
+      evt.preventDefault();
       callback();
       document.removeEventListener(`keydown`, handler);
     }
@@ -72,6 +68,7 @@ export const updateItem = (items, update) => {
   if (index === -1) {
     return items;
   }
+
   return [
     ...items.slice(0, index),
     update,
@@ -79,8 +76,38 @@ export const updateItem = (items, update) => {
   ];
 };
 
-export const dateComparator = (a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate));
-
+export const releaseDateComparator = (a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate));
 export const ratingComparator = (a, b) => b.rating - a.rating;
 
 export const commentsCountComparator = (a, b) => b.comments.length - a.comments.length;
+
+export const formatDate = (date) => {
+  const dt = dayjs(date);
+  const now = dayjs();
+  const minutes = Math.abs(dt.diff(now, `m`));
+  const hours = Math.abs(dt.diff(now, `h`));
+  const days = Math.abs(dt.diff(now, `d`));
+  const months = Math.abs(dt.diff(now, `M`));
+  const years = Math.abs(dt.diff(now, `y`));
+
+  if (minutes < 1) {
+    return `now`;
+  }
+  if (minutes < 60) {
+    return `${(minutes < 5) ? `A few` : minutes} minutes ago`;
+  }
+
+  if (hours < 24) {
+    return `${hours} hour${(hours > 1) ? `s` : ``} ago`;
+  }
+
+  if (months < 1) {
+    return `${days} day${(days > 1) ? `s` : ``} ago`;
+  }
+
+  if (years < 1) {
+    return `${months} month${(months > 1) ? `s` : ``} ago`;
+  }
+
+  return `${years} year${(years > 1) ? `s` : ``} ago`;
+};

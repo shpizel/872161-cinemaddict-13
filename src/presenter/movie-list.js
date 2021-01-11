@@ -5,7 +5,7 @@ import {EXTRA_FILMS_COUNT, ExtraSection, FILMS_PER_PAGE, Messages, SortType} fro
 import ShowMoreButton from "../view/show-more-button";
 import {
   commentsCountComparator,
-  dateComparator,
+  releaseDateComparator,
   isNull,
   ratingComparator,
   updateItem
@@ -207,7 +207,7 @@ export default class MovieList {
   _sortMovies(sortType) {
     switch (sortType) {
       case SortType.DATE:
-        this._films.sort(dateComparator);
+        this._films.sort(releaseDateComparator);
         break;
       case SortType.RATING:
         this._films.sort(ratingComparator);
