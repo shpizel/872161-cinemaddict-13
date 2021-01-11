@@ -1,40 +1,37 @@
-import {remove, render, RenderPosition} from './utils/render';
+import {render} from './utils/render';
 import Profile from './view/profile';
-import Menu from "./view/menu";
 import MoviesInside from "./view/movies-inside";
 import {getRandomFilm} from "./mock/film";
-import {getFilters} from "./mock/filters";
 import {
   FILMS_COUNT,
   IS_AJAX_WORKS,
   LOADING_TIMEOUT
 } from "./consts";
 import {getFilledList, mainNode, headerNode, footerStatsNode} from "./utils/common";
-import MovieListPresenter from "./presenter/movie-list";
+import FilmListPresenter from "./presenter/film-list";
+import FilmsModel from "./model/films";
+import FilterModel from "./model/filter";
+import MenuPresenter from "./presenter/menu";
 
-let films = [];
-
-let defaultMainMenu = new Menu(getFilters(films));
-render(defaultMainMenu, mainNode);
-
-const movieListPresenter = new MovieListPresenter(mainNode);
+const filmsModel = new FilmsModel();
+const filterModel = new FilterModel();
+const menuPresenter = new MenuPresenter(mainNode, filmsModel, filterModel);
+menuPresenter.init();
+const filmListPresenter = new FilmListPresenter(mainNode, filmsModel, filterModel);
 
 const main = () => {
   if (IS_AJAX_WORKS) {
-    films = getFilledList(FILMS_COUNT, getRandomFilm);
+    filmsModel.setFilms(getFilledList(FILMS_COUNT, getRandomFilm));
   }
-
-  remove(defaultMainMenu);
-
+  const films = filmsModel.getFilms();
   if (films.length > 0) {
     render(new Profile(films.filter((film) => film.isAlreadyWatched).length), headerNode);
-    render(new Menu(getFilters(films)), mainNode, RenderPosition.AFTERBEGIN);
   } else {
     render(new Profile(0), headerNode);
-    render(new Menu(getFilters(films)), mainNode, RenderPosition.AFTERBEGIN);
   }
 
-  movieListPresenter.init(films);
+  menuPresenter.init();
+  filmListPresenter.init();
 
   render(new MoviesInside(films.length), footerStatsNode);
 };

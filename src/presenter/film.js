@@ -5,12 +5,13 @@ import {
   isNull,
   makeEscKeyDownHandler
 } from "../utils/common";
-import {CATEGORIES, Mode} from "../consts";
+import {Category, Mode, UserAction} from "../consts";
 import FilmDetails from "../view/films/details";
+import CommentsModel from "../model/comments";
 
-export default class Movie {
-  constructor(filmsContainer, changeData, changeMode) {
-    this._filmsContainer = filmsContainer;
+export default class Film {
+  constructor(container, changeData, changeMode) {
+    this._container = container;
     this._changeData = changeData;
     this._changeMode = changeMode;
 
@@ -28,7 +29,6 @@ export default class Movie {
     this._filmCard = null;
     this._filmDetails = null;
     this._prevFilmCard = null;
-    this._prevFilmDetails = null;
   }
 
   _prepareHandlers() {
@@ -48,14 +48,16 @@ export default class Movie {
     this._initFilmCardHandlers();
 
     if (!this._filmDetails) {
-      this._filmDetails = new FilmDetails(this._film, this._filmUpdateHandler);
+      const commentsModel = new CommentsModel();
+      commentsModel.setComments(this._film.comments);
+      this._filmDetails = new FilmDetails(this._film, commentsModel, this._filmUpdateHandler);
       this._filmDetails.setCloseHandler(this._closeFilmDetails);
     } else {
       this._filmDetails.updateData(this._film);
     }
 
     if (isNull(this._prevFilmCard)) {
-      render(this._filmCard, this._filmsContainer);
+      render(this._filmCard, this._container);
       return;
     }
 
@@ -65,9 +67,9 @@ export default class Movie {
 
   _filmUpdateHandler(reason) {
     const map = {
-      [CATEGORIES.FAVOURITES]: this._handleFavouriteClick,
-      [CATEGORIES.WATCHED]: this._handleWatchedClick,
-      [CATEGORIES.WATCHLIST]: this._handleWatchlistClick
+      [Category.FAVOURITES]: this._handleFavouriteClick,
+      [Category.WATCHED]: this._handleWatchedClick,
+      [Category.WATCHLIST]: this._handleWatchlistClick
     };
     if (map.hasOwnProperty(reason)) {
       map[reason]();
@@ -84,15 +86,15 @@ export default class Movie {
   }
 
   _handleFavouriteClick() {
-    this._changeData(Object.assign({}, this._film, {isInFavourites: !this._film.isInFavourites}));
+    this._changeData(UserAction.UPDATE_FILM_CATEGORY, Object.assign({}, this._film, {isInFavourites: !this._film.isInFavourites}));
   }
 
   _handleWatchedClick() {
-    this._changeData(Object.assign({}, this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
+    this._changeData(UserAction.UPDATE_FILM_CATEGORY, Object.assign({}, this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
   }
 
   _handleWatchlistClick() {
-    this._changeData(Object.assign({}, this._film, {isInWatchlist: !this._film.isInWatchlist}));
+    this._changeData(UserAction.UPDATE_FILM_CATEGORY, Object.assign({}, this._film, {isInWatchlist: !this._film.isInWatchlist}));
   }
 
   _closeFilmDetails() {

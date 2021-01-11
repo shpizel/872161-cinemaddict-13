@@ -1,11 +1,12 @@
 import dayjs from "dayjs";
+import he from "he";
 import {nanoid} from "nanoid";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
-import {BLANK_FILM, CATEGORIES, EMOTIONS} from "../../consts";
+import {BLANK_FILM, Category, EMOTION, UserAction} from "../../consts";
 import {isNull, formatDate} from "../../utils/common";
 
-const getFilmDetailsHTML = (film) => {
+const getFilmDetailsHTML = (film, comments) => {
   const duration = getFilmDuration(film.duration);
 
   return `<section class="film-details">
@@ -83,10 +84,10 @@ const getFilmDetailsHTML = (film) => {
 
     <div class="film-details__bottom-container">
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.comments.length}</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
         <ul class="film-details__comments-list">
-          ${film.comments.map((comment) => `
+          ${comments.map((comment) => `
 <li class="film-details__comment">
   <span class="film-details__comment-emoji">
     <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
@@ -96,7 +97,7 @@ const getFilmDetailsHTML = (film) => {
     <p class="film-details__comment-info">
       <span class="film-details__comment-author">${comment.author}</span>
       <span class="film-details__comment-day">${formatDate(comment.date)}</span>
-      <button class="film-details__comment-delete">Delete</button>
+      <button class="film-details__comment-delete" data-comment-id="${comment.id}">Delete</button>
     </p>
   </div>
 </li>`).join(`\n`)}
@@ -110,7 +111,7 @@ const getFilmDetailsHTML = (film) => {
           </label>
 
           <div class="film-details__emoji-list">
-            ${EMOTIONS.map((emotion) => `
+            ${EMOTION.map((emotion) => `
 <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}"${(film.activeEmotion === emotion) ? ` checked` : ``}>
 <label class="film-details__emoji-label" for="emoji-${emotion}">
   <img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">
@@ -125,33 +126,62 @@ const getFilmDetailsHTML = (film) => {
 };
 
 export default class FilmDetails extends Smart {
-  constructor(film = BLANK_FILM, updateHandler) {
+  constructor(film = BLANK_FILM, commentsModel, updateHandler) {
     super();
     this._data = FilmDetails.parseFilmToData(film);
+    this._commentsModel = commentsModel;
     this._updateHandler = updateHandler;
     this._closeHandler = this._closeHandler.bind(this);
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
     this._favouriteClickHandler = this._favouriteClickHandler.bind(this);
+    this._deleteCommentClickHandler = this._deleteCommentClickHandler.bind(this);
 
     this._emojiClickHandler = this._emojiClickHandler.bind(this);
     this._textareaInputHandler = this._textareaInputHandler.bind(this);
     this._textAreaKeydownHandler = this._textAreaKeydownHandler.bind(this);
 
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+    this._commentsModel.addObserver(this._handleModelEvent);
+
     this._setInnerHandlers();
   }
 
+  _deleteCommentClickHandler(evt) {
+    evt.preventDefault();
+    const commentId = evt.target.dataset.commentId;
+    const targetComment = this._commentsModel.getComments().find((comment) => comment.id === commentId);
+    if (!targetComment) {
+      throw new Error(`Invalid comment id: ${commentId}`);
+    }
+    this._commentsModel.removeComment(targetComment);
+  }
+
+  _handleModelEvent(reason) {
+    switch (reason) {
+      case UserAction.ADD_COMMENT:
+        this.updateData({comments: this._commentsModel.getComments(), activeEmotion: null, writtenText: ``});
+        break;
+      case UserAction.DELETE_COMMENT:
+        this.updateData({comments: this._commentsModel.getComments()});
+        break;
+      default:
+        throw new Error(`Invalid reason: ${reason}`);
+    }
+  }
+
   getTemplate() {
-    return getFilmDetailsHTML(this._data);
+    return getFilmDetailsHTML(this._data, this._commentsModel.getComments());
   }
 
   _setInnerHandlers() {
     this._watchlistButtonNode.addEventListener(`click`, this._watchlistClickHandler);
     this._watchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
     this._favouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
-    Array.from(this._emotionsRadioNodes).forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
+    this._emotionsRadioNodes.forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
     this._textareaNode.addEventListener(`input`, this._textareaInputHandler);
     this._textareaNode.addEventListener(`keydown`, this._textAreaKeydownHandler);
+    this._deleteButtonNodes.forEach((node) => node.addEventListener(`click`, this._deleteCommentClickHandler));
   }
 
   updateData(update, justDataUpdate) {
@@ -206,15 +236,13 @@ export default class FilmDetails extends Smart {
     if ((evt.ctrlKey || evt.metaKey) && (evt.key === `Enter`)) {
       evt.preventDefault();
       if (this._data.activeEmotion && this._data.writtenText) {
-        const newComments = [...this._data.comments];
-        newComments.push({
+        this._commentsModel.addComment({
           id: nanoid(),
           author: `shpizel`,
-          comment: this._data.writtenText,
+          comment: he.encode(this._data.writtenText),
           date: dayjs(),
           emotion: this._data.activeEmotion
         });
-        this.updateData({comments: newComments, activeEmotion: null, writtenText: ``});
       }
     }
   }
@@ -226,17 +254,17 @@ export default class FilmDetails extends Smart {
 
   _watchlistClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(CATEGORIES.WATCHLIST);
+    this._updateHandler(Category.WATCHLIST);
   }
 
   _watchedClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(CATEGORIES.WATCHED);
+    this._updateHandler(Category.WATCHED);
   }
 
   _favouriteClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(CATEGORIES.FAVOURITES);
+    this._updateHandler(Category.FAVOURITES);
   }
 
   setCloseHandler(callback) {
@@ -270,5 +298,9 @@ export default class FilmDetails extends Smart {
 
   get _emotionsRadioNodes() {
     return this.querySelectorAll(`.film-details__emoji-list > input`);
+  }
+
+  get _deleteButtonNodes() {
+    return this.querySelectorAll(`.film-details__comment-delete`);
   }
 }

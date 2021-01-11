@@ -13,6 +13,14 @@ export default class Abstract {
     this._callback = {};
   }
 
+  contains(target) {
+    if (target instanceof Abstract) {
+      target = target.getElement();
+    }
+
+    return this.getElement().contains(target);
+  }
+
   getTemplate() {
     throw new Error(`Abstract method not implemented: getTemplate`);
   }

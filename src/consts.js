@@ -11,7 +11,7 @@ export const IS_AJAX_WORKS = getRandomNumber(0, 5) !== 0;
 export const LOADING_TIMEOUT = 300;
 
 
-export const Messages = {
+export const Message = {
   ALL_MOVIES: `All movies. Upcoming`,
   LOADING: `Loading...`,
   NO_MOVIES: `There are no movies in our database`
@@ -28,11 +28,11 @@ export const SortType = {
   RATING: `rating`
 };
 
-export const FilmFilter = {
+export const FilterType = {
   ALL: `All movies`,
   WATCHED: `Watchlist`,
   WATCHLIST: `History`,
-  FAVOURITE: `Favourites`
+  FAVOURITES: `Favourites`
 };
 
 export const Mode = {
@@ -72,15 +72,23 @@ export const BLANK_FILM = {
   isInFavourites: null
 };
 
-export const EMOTIONS = [
+export const EMOTION = [
   `smile`,
   `angry`,
   `puke`,
   `sleeping`,
 ];
 
-export const CATEGORIES = {
+export const Category = {
+  ALL: `all`,
   WATCHLIST: `watchlist`,
   WATCHED: `watched`,
   FAVOURITES: `favourites`
+};
+
+export const UserAction = {
+  DELETE_COMMENT: `DELETE_COMMENT`,
+  ADD_COMMENT: `ADD_COMMENT`,
+  UPDATE_FILM_CATEGORY: `UPDATE_FILM_CATEGORY`,
+  UPDATE_FILTER: `UPDATE_FILTER`
 };
