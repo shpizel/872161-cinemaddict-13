@@ -4,7 +4,7 @@ export const getFilmDuration = (duration) => {
   return `${Math.round(duration / 60)}h${(duration % 60) ? ` ${duration % 60}m` : ``}`;
 };
 
-export const FilmsFilter = {
+export const filter = {
   [FilterType.ALL]: (films) => films,
   [FilterType.WATCHLIST]: (films) => films.filter((film) => (film.isInWatchlist)),
   [FilterType.WATCHED]: (films) => films.filter((film) => (film.isAlreadyWatched)),

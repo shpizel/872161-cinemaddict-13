@@ -1,6 +1,5 @@
 import {getRandomNumber} from "./utils/common";
 
-
 export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
 const FILMS_COUNT_MIN = 15;
 const FILMS_COUNT_MAX = 20;
@@ -79,16 +78,17 @@ export const EMOTION = [
   `sleeping`,
 ];
 
-export const Category = {
-  ALL: `all`,
-  WATCHLIST: `watchlist`,
-  WATCHED: `watched`,
-  FAVOURITES: `favourites`
-};
+export const Category = Object.assign({}, FilterType);
 
 export const UserAction = {
   DELETE_COMMENT: `DELETE_COMMENT`,
   ADD_COMMENT: `ADD_COMMENT`,
   UPDATE_FILM_CATEGORY: `UPDATE_FILM_CATEGORY`,
   UPDATE_FILTER: `UPDATE_FILTER`
+};
+
+export const UpdateType = {
+  PATCH: `PATCH`,
+  MINOR: `MINOR`,
+  MAJOR: `MAJOR`
 };

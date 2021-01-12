@@ -3,10 +3,10 @@ import he from "he";
 import {nanoid} from "nanoid";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
-import {BLANK_FILM, Category, EMOTION, UserAction} from "../../consts";
+import {BLANK_FILM, Category, EMOTION} from "../../consts";
 import {isNull, formatDate} from "../../utils/common";
 
-const getFilmDetailsHTML = (film, comments) => {
+const getFilmDetailsHTML = (film) => {
   const duration = getFilmDuration(film.duration);
 
   return `<section class="film-details">
@@ -84,30 +84,31 @@ const getFilmDetailsHTML = (film, comments) => {
 
     <div class="film-details__bottom-container">
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.comments.length}</span></h3>
 
         <ul class="film-details__comments-list">
-          ${comments.map((comment) => `
-<li class="film-details__comment">
-  <span class="film-details__comment-emoji">
-    <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
-  </span>
-  <div>
-    <p class="film-details__comment-text">${comment.comment}</p>
-    <p class="film-details__comment-info">
-      <span class="film-details__comment-author">${comment.author}</span>
-      <span class="film-details__comment-day">${formatDate(comment.date)}</span>
-      <button class="film-details__comment-delete" data-comment-id="${comment.id}">Delete</button>
-    </p>
-  </div>
-</li>`).join(`\n`)}
+          ${film.comments.map((comment) => `
+          <li class="film-details__comment">
+            <span class="film-details__comment-emoji">
+              <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
+            </span>
+            <div>
+              <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
+              <p class="film-details__comment-info">
+                <span class="film-details__comment-author">${comment.author}</span>
+                <span class="film-details__comment-day">${formatDate(comment.date)}</span>
+                <button class="film-details__comment-delete" data-comment-id="${comment.id}">Delete</button>
+              </p>
+            </div>
+          </li>
+        `).join(`\n`)}
         </ul>
 
         <div class="film-details__new-comment">
           <div class="film-details__add-emoji-label">${(!isNull(film.activeEmotion) ? `<img src="images/emoji/${film.activeEmotion}.png" width="55" height="55" alt="emoji-smile">` : ``)}</div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"${(!film.activeEmotion) ? ` disabled` : ``}>${(film.writtenText.length > 0 && film.activeEmotion) ? film.writtenText : ``}</textarea>
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"${(!film.activeEmotion) ? ` disabled` : ``}>${(film.writtenText.length > 0 && film.activeEmotion) ? he.encode(film.writtenText) : ``}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
@@ -126,10 +127,9 @@ const getFilmDetailsHTML = (film, comments) => {
 };
 
 export default class FilmDetails extends Smart {
-  constructor(film = BLANK_FILM, commentsModel, updateHandler) {
+  constructor(film = BLANK_FILM, updateHandler) {
     super();
     this._data = FilmDetails.parseFilmToData(film);
-    this._commentsModel = commentsModel;
     this._updateHandler = updateHandler;
     this._closeHandler = this._closeHandler.bind(this);
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
@@ -141,37 +141,28 @@ export default class FilmDetails extends Smart {
     this._textareaInputHandler = this._textareaInputHandler.bind(this);
     this._textAreaKeydownHandler = this._textAreaKeydownHandler.bind(this);
 
-    this._handleModelEvent = this._handleModelEvent.bind(this);
-    this._commentsModel.addObserver(this._handleModelEvent);
-
     this._setInnerHandlers();
+  }
+
+  setDeleteCommentClickHandler(callback) {
+    this._callback.deleteComment = callback;
+  }
+
+  setAddCommentClickHandler(callback) {
+    this._callback.addComment = callback;
+  }
+
+  _addCommentHandler(comment) {
+    this._callback.addComment(comment);
   }
 
   _deleteCommentClickHandler(evt) {
     evt.preventDefault();
-    const commentId = evt.target.dataset.commentId;
-    const targetComment = this._commentsModel.getComments().find((comment) => comment.id === commentId);
-    if (!targetComment) {
-      throw new Error(`Invalid comment id: ${commentId}`);
-    }
-    this._commentsModel.removeComment(targetComment);
-  }
-
-  _handleModelEvent(reason) {
-    switch (reason) {
-      case UserAction.ADD_COMMENT:
-        this.updateData({comments: this._commentsModel.getComments(), activeEmotion: null, writtenText: ``});
-        break;
-      case UserAction.DELETE_COMMENT:
-        this.updateData({comments: this._commentsModel.getComments()});
-        break;
-      default:
-        throw new Error(`Invalid reason: ${reason}`);
-    }
+    this._callback.deleteComment(evt.currentTarget.dataset.commentId);
   }
 
   getTemplate() {
-    return getFilmDetailsHTML(this._data, this._commentsModel.getComments());
+    return getFilmDetailsHTML(this._data);
   }
 
   _setInnerHandlers() {
@@ -236,13 +227,14 @@ export default class FilmDetails extends Smart {
     if ((evt.ctrlKey || evt.metaKey) && (evt.key === `Enter`)) {
       evt.preventDefault();
       if (this._data.activeEmotion && this._data.writtenText) {
-        this._commentsModel.addComment({
+        this._addCommentHandler({
           id: nanoid(),
           author: `shpizel`,
-          comment: he.encode(this._data.writtenText),
+          comment: this._data.writtenText,
           date: dayjs(),
           emotion: this._data.activeEmotion
         });
+        this.updateData({activeEmotion: null, writtenText: ``});
       }
     }
   }

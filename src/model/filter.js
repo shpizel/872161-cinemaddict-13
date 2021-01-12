@@ -1,5 +1,5 @@
 import Observer from "../utils/observer";
-import {FilterType, UserAction} from "../consts";
+import {FilterType} from "../consts";
 
 export default class Filter extends Observer {
   constructor(defaultFilter = FilterType.ALL) {
@@ -7,8 +7,9 @@ export default class Filter extends Observer {
     this._filter = defaultFilter;
   }
 
-  setFilter(filter) {
+  setFilter(updateType, filter) {
     this._filter = filter;
+    this._notify(updateType, filter);
   }
 
   getFilter() {
@@ -19,7 +20,6 @@ export default class Filter extends Observer {
     if (newFilter === this.getFilter()) {
       return;
     }
-    this._filter = newFilter;
-    this._notify(UserAction.UPDATE_FILTER, this._filter);
+    this.setFilter(newFilter);
   }
 }

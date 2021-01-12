@@ -1,7 +1,7 @@
 import MenuView from "../view/menu";
 import {remove, render, RenderPosition, replace} from "../utils/render";
 import {getFilters} from "../mock/filters";
-import {UserAction} from "../consts";
+import {UpdateType} from "../consts";
 
 export default class Menu {
   constructor(container, filmsModel, filterModel) {
@@ -31,18 +31,11 @@ export default class Menu {
     remove(prevMenu);
   }
 
-  _handleModelEvent(reason) {
-    switch (reason) {
-      case UserAction.UPDATE_FILTER:
-      case UserAction.UPDATE_FILM_CATEGORY:
-        this.init();
-        break;
-      default:
-        throw new Error(`Invalid reason: ${reason}`);
-    }
+  _handleModelEvent() {
+    this.init();
   }
 
   _changeFilterHandler(newFilter) {
-    this._filterModel.updateFilter(newFilter);
+    this._filterModel.setFilter(UpdateType.MAJOR, newFilter);
   }
 }

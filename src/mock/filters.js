@@ -1,5 +1,5 @@
 import {FilterType} from "../consts";
-import {FilmsFilter} from "../utils/film";
+import {filter} from "../utils/film";
 
 const getFilter = (name, isActive, counter) => {
   return {
@@ -11,6 +11,6 @@ const getFilter = (name, isActive, counter) => {
 
 export const getFilters = (films, activeFilter = FilterType.ALL) => {
   return Object.entries(FilterType).map(([, value]) => {
-    return getFilter(value, activeFilter === value, (value !== FilterType.ALL) ? FilmsFilter[value](films).length : null);
+    return getFilter(value, activeFilter === value, (value !== FilterType.ALL) ? filter[value](films).length : null);
   });
 };

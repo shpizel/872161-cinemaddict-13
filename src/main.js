@@ -3,7 +3,7 @@ import Profile from './view/profile';
 import MoviesInside from "./view/movies-inside";
 import {getRandomFilm} from "./mock/film";
 import {
-  FILMS_COUNT,
+  FILMS_COUNT, FilterType,
   IS_AJAX_WORKS,
   LOADING_TIMEOUT
 } from "./consts";
@@ -12,6 +12,7 @@ import FilmListPresenter from "./presenter/film-list";
 import FilmsModel from "./model/films";
 import FilterModel from "./model/filter";
 import MenuPresenter from "./presenter/menu";
+import {filter} from "./utils/film";
 
 const filmsModel = new FilmsModel();
 const filterModel = new FilterModel();
@@ -25,7 +26,7 @@ const main = () => {
   }
   const films = filmsModel.getFilms();
   if (films.length > 0) {
-    render(new Profile(films.filter((film) => film.isAlreadyWatched).length), headerNode);
+    render(new Profile(filter[FilterType.WATCHED](films).length), headerNode);
   } else {
     render(new Profile(0), headerNode);
   }

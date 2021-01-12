@@ -5,7 +5,7 @@ import {
   isNull,
   makeEscKeyDownHandler
 } from "../utils/common";
-import {Category, Mode, UserAction} from "../consts";
+import {Category, Mode, UpdateType, UserAction} from "../consts";
 import FilmDetails from "../view/films/details";
 import CommentsModel from "../model/comments";
 
@@ -39,19 +39,39 @@ export default class Film {
     this._escKeyDownHandler = makeEscKeyDownHandler(this._closeFilmDetails);
     this._renderFilmDetails = this._renderFilmDetails.bind(this);
     this._filmUpdateHandler = this._filmUpdateHandler.bind(this);
+    this._handleCommentDelete = this._handleCommentDelete.bind(this);
+    this._handleCommentAdd = this._handleCommentAdd.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+  }
+
+  _handleCommentDelete(commentId) {
+    const targetComment = this._commentsModel.getComments().find((comment) => comment.id === commentId);
+    if (!targetComment) {
+      throw new Error(`Invalid comment id: ${commentId}`);
+    }
+    this._commentsModel.removeComment(targetComment);
+  }
+
+  _handleCommentAdd(comment) {
+    this._commentsModel.addComment(comment);
   }
 
   init(film) {
     this._film = film;
     this._prevFilmCard = this._filmCard;
-    this._filmCard = new FilmCard(this._film);
+
+    this._commentsModel = new CommentsModel();
+    this._commentsModel.setComments(this._film.comments);
+    this._commentsModel.addObserver(this._handleModelEvent);
+
+    this._filmCard = new FilmCard(this._film, this._commentsModel.getComments());
     this._initFilmCardHandlers();
 
     if (!this._filmDetails) {
-      const commentsModel = new CommentsModel();
-      commentsModel.setComments(this._film.comments);
-      this._filmDetails = new FilmDetails(this._film, commentsModel, this._filmUpdateHandler);
+      this._filmDetails = new FilmDetails(this._film, this._filmUpdateHandler);
       this._filmDetails.setCloseHandler(this._closeFilmDetails);
+      this._filmDetails.setAddCommentClickHandler(this._handleCommentAdd);
+      this._filmDetails.setDeleteCommentClickHandler(this._handleCommentDelete);
     } else {
       this._filmDetails.updateData(this._film);
     }
@@ -63,6 +83,18 @@ export default class Film {
 
     replace(this._filmCard, this._prevFilmCard);
     remove(this._prevFilmCard);
+  }
+
+  _handleModelEvent(actionType) {
+    const comments = this._commentsModel.getComments();
+    switch (actionType) {
+      case UserAction.ADD_COMMENT:
+      case UserAction.DELETE_COMMENT:
+        this._filmDetails.updateData({comments});
+        break;
+      default:
+        throw new Error(`Invalid actionType: ${actionType}`);
+    }
   }
 
   _filmUpdateHandler(reason) {
@@ -86,15 +118,15 @@ export default class Film {
   }
 
   _handleFavouriteClick() {
-    this._changeData(UserAction.UPDATE_FILM_CATEGORY, Object.assign({}, this._film, {isInFavourites: !this._film.isInFavourites}));
+    this._changeData(UserAction.UPDATE_FILM_CATEGORY, UpdateType.PATCH, Object.assign({}, this._film, {isInFavourites: !this._film.isInFavourites}));
   }
 
   _handleWatchedClick() {
-    this._changeData(UserAction.UPDATE_FILM_CATEGORY, Object.assign({}, this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
+    this._changeData(UserAction.UPDATE_FILM_CATEGORY, UpdateType.PATCH, Object.assign({}, this._film, {isAlreadyWatched: !this._film.isAlreadyWatched}));
   }
 
   _handleWatchlistClick() {
-    this._changeData(UserAction.UPDATE_FILM_CATEGORY, Object.assign({}, this._film, {isInWatchlist: !this._film.isInWatchlist}));
+    this._changeData(UserAction.UPDATE_FILM_CATEGORY, UpdateType.PATCH, Object.assign({}, this._film, {isInWatchlist: !this._film.isInWatchlist}));
   }
 
   _closeFilmDetails() {
@@ -115,6 +147,7 @@ export default class Film {
 
   destroy() {
     remove(this._filmCard);
+    this.resetView();
     remove(this._filmDetails);
   }
 
