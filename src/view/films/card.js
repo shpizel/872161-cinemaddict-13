@@ -3,7 +3,7 @@ import Abstract from "../abstract";
 import {FILMS_DESCRIPTION_MAX_LENGTH} from "../../consts";
 import {getFilmDuration} from "../../utils/film";
 
-const getFilmCardHTML = (film, comments) => {
+const getFilmCardHTML = (film, commentsCount) => {
   const duration = getFilmDuration(film.duration);
   const year = dayjs(film.release_date).year();
 
@@ -17,7 +17,7 @@ const getFilmCardHTML = (film, comments) => {
   </p>
   <img src="./images/posters/${film.poster}" alt="" class="film-card__poster">
   <p class="film-card__description">${film.description.substr(0, FILMS_DESCRIPTION_MAX_LENGTH)}…</p>
-  <a class="film-card__comments">${comments.length} comments</a>
+  <a class="film-card__comments">${commentsCount} comment${(commentsCount > 1) ? `s` : ``}</a>
   <div class="film-card__controls">
     <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist${film.isInWatchlist ? ` film-card__controls-item--active` : ``}" type="button">Add to watchlist</button>
     <button class="film-card__controls-item button film-card__controls-item--mark-as-watched${film.isAlreadyWatched ? ` film-card__controls-item--active` : ``}" type="button">Mark as watched</button>
@@ -44,7 +44,7 @@ export default class FilmCard extends Abstract {
 
   _clickHandler(evt) {
     evt.preventDefault();
-    this._callback.click();
+    this._callback.click(this._film.id);
   }
 
   setClickHandler(callback) {

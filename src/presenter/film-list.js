@@ -1,12 +1,14 @@
-import {remove, render} from "../utils/render";
+import {remove, render, RenderPosition, setHideOverflow, unsetHideOverflow} from "../utils/render";
 import FilmsListContainer from "../view/films/list/container";
 import FilmsListTitle from "../view/films/list/title";
 import {
+  Category,
   EXTRA_FILMS_COUNT,
   ExtraSection,
   FILMS_PER_PAGE,
   FilterType,
   Message,
+  Mode,
   SortType,
   UpdateType,
   UserAction
@@ -16,18 +18,20 @@ import {
   commentsCountComparator,
   releaseDateComparator,
   isNull,
-  ratingComparator
+  ratingComparator, footerNode, makeEscKeyDownHandler
 } from "../utils/common";
 import FilmsListSection from "../view/films/list/section";
 import FilmPresenter from "./film";
 import Sorting from "../view/sorting";
 import FilmsSection from "../view/films/section";
 import {filter} from "../utils/film";
+import FilmDetails from "../view/films/details";
 
 export default class FilmList {
-  constructor(container, filmsModel, filterModel) {
+  constructor(container, filmsModel, commentsModel, filterModel) {
     this._container = container;
     this._filmsModel = filmsModel;
+    this._commentsModel = commentsModel;
     this._filterModel = filterModel;
 
     this._prepareAll();
@@ -39,6 +43,61 @@ export default class FilmList {
     this._prepareTitles();
     this._prepareHandlers();
     this._prepareSorting();
+    this._prepareFilmDetails();
+  }
+
+  _prepareFilmDetails() {
+    this._filmDetails = new FilmDetails();
+    this._filmDetails.setCloseHandler(this._closeFilmDetails);
+    this._filmDetails.setUpdateHandler(this._filmUpdateHandler);
+    this._filmDetails.setAddCommentClickHandler(this._handleCommentAdd);
+    this._filmDetails.setDeleteCommentClickHandler(this._handleCommentDelete);
+  }
+
+  _filmUpdateHandler(filmId, category) {
+    const film = this._filmsModel.getFilmById(filmId);
+
+    switch (category) {
+      case Category.FAVOURITES:
+        this._handleFilmCategoryChange(UserAction.UPDATE_FILM_CATEGORY, UpdateType.PATCH, Object.assign({}, film, {isInFavourites: !film.isInFavourites}));
+        break;
+      case Category.WATCHED:
+        this._handleFilmCategoryChange(UserAction.UPDATE_FILM_CATEGORY, UpdateType.PATCH, Object.assign({}, film, {isAlreadyWatched: !film.isAlreadyWatched}));
+        break;
+      case Category.WATCHLIST:
+        this._handleFilmCategoryChange(UserAction.UPDATE_FILM_CATEGORY, UpdateType.PATCH, Object.assign({}, film, {isInWatchlist: !film.isInWatchlist}));
+        break;
+      default:
+        throw new Error(`Invalid category: ${category}`);
+    }
+  }
+
+  _closeFilmDetails() {
+    remove(this._filmDetails);
+    unsetHideOverflow();
+    document.removeEventListener(`keydown`, this._escKeyDownHandler);
+  }
+
+  _renderFilmDetails(filmId) {
+    const film = this._filmsModel.getFilmById(filmId);
+    this._filmDetails.updateData(Object.assign({}, film, {comments: this._commentsModel.getCommentsByFilmId(filmId)}));
+    this._filmDetails.restoreHandlers();
+    document.addEventListener(`keydown`, this._escKeyDownHandler);
+    setHideOverflow();
+    render(this._filmDetails, footerNode, RenderPosition.BEFOREEND);
+    this._mode = Mode.POPUP;
+  }
+
+  _handleCommentDelete(filmId, commentId) {
+    const targetComment = this._commentsModel.getCommentsByFilmId(filmId).find((comment) => comment.id === commentId);
+    if (!targetComment) {
+      throw new Error(`Invalid comment id: ${commentId}`);
+    }
+    this._commentsModel.removeComment(filmId, targetComment);
+  }
+
+  _handleCommentAdd(filmId, comment) {
+    this._commentsModel.addComment(filmId, comment);
   }
 
   _prepareVariables() {
@@ -47,27 +106,37 @@ export default class FilmList {
     this._topRatedMoviesPresenters = new Map();
     this._mostCommentedMoviesPresenters = new Map();
     this._renderedFilmsCount = FILMS_PER_PAGE;
+    this._mode = Mode.DEFAULT;
   }
 
   _prepareHandlers() {
     this._showMoreButtonClickHandler = this._showMoreButtonClickHandler.bind(this);
-    this._handleFilmChange = this._handleFilmChange.bind(this);
+    this._handleFilmCategoryChange = this._handleFilmCategoryChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
-    this._handleModeChange = this._handleModeChange.bind(this);
-
-    this._handleModelEvent = this._handleModelEvent.bind(this);
+    this._closeFilmDetails = this._closeFilmDetails.bind(this);
+    this._escKeyDownHandler = makeEscKeyDownHandler(this._closeFilmDetails);
+    this._renderFilmDetails = this._renderFilmDetails.bind(this);
+    this._handleCommentDelete = this._handleCommentDelete.bind(this);
+    this._handleCommentAdd = this._handleCommentAdd.bind(this);
+    this._handleFilmsModelEvent = this._handleFilmsModelEvent.bind(this);
+    this._handleFilterModelEvent = this._handleFilterModelEvent.bind(this);
+    this._handleCommentsModelEvent = this._handleCommentsModelEvent.bind(this);
+    this._filmUpdateHandler = this._filmUpdateHandler.bind(this);
   }
 
   init() {
-    this._filterModel.addObserver(this._handleModelEvent);
-    this._filmsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleFilterModelEvent);
+    this._filmsModel.addObserver(this._handleFilmsModelEvent);
+    this._commentsModel.addObserver(this._handleCommentsModelEvent);
+
     this._renderBoard();
   }
 
   destroy() {
     this._clearBoard({resetSortType: true, resetRenderedTasksCount: true});
-    this._filterModel.removeObserver(this._handleModelEvent);
-    this._filmsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleFilmsModelEvent);
+    this._filmsModel.removeObserver(this._handleFilmsModelEvent);
+    this._commentsModel.removeObserver(this._handleCommentsModelEvent);
   }
 
   _getFilms() {
@@ -83,20 +152,57 @@ export default class FilmList {
     }
   }
 
-  _handleModelEvent(updateType, data) {
+  _handleCommentsModelEvent(updateType, filmId) {
+    const film = this._filmsModel.getFilmById(filmId);
+    switch (updateType) {
+      case UpdateType.MINOR:
+        this._updateFilmCard(film);
+        if (this._mode === Mode.POPUP) {
+          const comments = {comments: this._commentsModel.getCommentsByFilmId(film.id)};
+          this._filmDetails.updateData(Object.assign({}, film, comments));
+        }
+        break;
+      case UpdateType.MAJOR:
+        this._updateFilmCard(film);
+        if (this._mode === Mode.POPUP) {
+          const comments = {comments: this._commentsModel.getCommentsByFilmId(film.id), activeEmotion: null, writtenText: ``};
+          this._filmDetails.updateData(Object.assign({}, film, comments));
+        }
+        break;
+    }
+  }
+
+  _handleFilterModelEvent(updateType) {
+    switch (updateType) {
+      case UpdateType.MAJOR:
+        if (this._mode === Mode.POPUP) {
+          this._closeFilmDetails();
+        }
+        this._clearBoard({resetSortType: true, resetRenderedTasksCount: true});
+        this._renderBoard();
+        break;
+      default:
+        throw new Error(`Invalid update type: ${updateType}`);
+    }
+  }
+
+  _handleFilmsModelEvent(updateType, film) {
     switch (updateType) {
       case UpdateType.PATCH:
-        this._updateFilmCard(data);
+        this._updateFilmCard(film);
+        if (this._mode === Mode.POPUP) {
+          this._filmDetails.updateData(Object.assign({}, film, {comments: this._commentsModel.getCommentsByFilmId(film.id)}));
+        }
         break;
       case UpdateType.MINOR:
-        this._updateFilmCard(data);
+        if (this._mode === Mode.POPUP) {
+          this._filmDetails.updateData(Object.assign({}, film, {comments: this._commentsModel.getCommentsByFilmId(film.id)}));
+        }
         this._clearBoard();
         this._renderBoard();
         break;
-      case UpdateType.MAJOR:
-        this._clearBoard({resetSortType: true});
-        this._renderBoard();
-        break;
+      default:
+        throw new Error(`Invalid update type: ${updateType}`);
     }
   }
 
@@ -108,7 +214,7 @@ export default class FilmList {
     const filmId = film.id;
     this._getAllPresentersList().forEach((map) => {
       if (map.has(filmId)) {
-        map.get(filmId).init(film);
+        map.get(filmId).init(film, this._commentsModel.getCommentsByFilmId(filmId).length);
       }
     });
   }
@@ -130,7 +236,7 @@ export default class FilmList {
     this._sorting = null;
   }
 
-  _handleFilmChange(actionType, updateType, update) {
+  _handleFilmCategoryChange(actionType, updateType, update) {
     switch (actionType) {
       case UserAction.UPDATE_FILM_CATEGORY:
         if ((updateType === UpdateType.PATCH) && (this._filterModel.getFilter() !== FilterType.ALL)) {
@@ -138,16 +244,9 @@ export default class FilmList {
         }
         this._filmsModel.updateFilm(updateType, update);
         break;
-      case UserAction.ADD_COMMENT:
       default:
         throw new Error(`Add comment in list not implemented`);
     }
-  }
-
-  _handleModeChange() {
-    this._getAllPresentersList().forEach((currentPresentersMap) => {
-      currentPresentersMap.forEach((presenter) => presenter.resetView());
-    });
   }
 
   _enableLoadingMessage() {
@@ -203,9 +302,10 @@ export default class FilmList {
 
   _renderFilmCard(film, container, presentersStorage) {
     if (!presentersStorage.has(film.id)) {
-      presentersStorage.set(film.id, new FilmPresenter(container, this._handleFilmChange, this._handleModeChange));
+      const presenter = new FilmPresenter(container, this._handleFilmCategoryChange, this._renderFilmDetails);
+      presentersStorage.set(film.id, presenter);
     }
-    presentersStorage.get(film.id).init(film);
+    presentersStorage.get(film.id).init(film, this._commentsModel.getCommentsByFilmId(film.id).length);
   }
 
   _showMoreButtonClickHandler() {
@@ -247,12 +347,15 @@ export default class FilmList {
   }
 
   _renderMostCommentedMovies() {
-    const ratedFilmsCount = this._getFilms().filter((film) => film.comments.length > 0).length;
+    const ratedFilmsCount = this._getFilms().filter((film) => this._commentsModel.getCommentsByFilmId(film.id).length > 0).length;
     if (!ratedFilmsCount) {
       return;
     }
 
-    const mostCommentedFilms = this._getFilms().slice().sort(commentsCountComparator);
+    const mostCommentedFilms = this._getFilms().map((film) => {
+      film.commentsCount = this._commentsModel.getCommentsByFilmId(film.id).length;
+      return film;
+    }).sort(commentsCountComparator);
     const extraContainer = this._prepareExtraSection(ExtraSection.MOST_COMMENTED);
     mostCommentedFilms.slice(0, EXTRA_FILMS_COUNT)
       .forEach((film) => this._renderFilmCard(film, extraContainer, this._mostCommentedMoviesPresenters));

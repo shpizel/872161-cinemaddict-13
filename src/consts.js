@@ -6,7 +6,6 @@ const FILMS_COUNT_MAX = 20;
 export const FILMS_COUNT = getRandomNumber(FILMS_COUNT_MIN, FILMS_COUNT_MAX);
 export const FILMS_PER_PAGE = 5;
 export const EXTRA_FILMS_COUNT = 2;
-export const IS_AJAX_WORKS = getRandomNumber(0, 5) !== 0;
 export const LOADING_TIMEOUT = 300;
 
 
@@ -55,7 +54,7 @@ export const BLANK_FILM = {
   title: ``,
   originalTitle: ``,
   director: ``,
-  writers: ``,
+  writers: [],
   releaseDate: ``,
   duration: 0,
   ageRating: 0,

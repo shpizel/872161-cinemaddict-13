@@ -1,4 +1,4 @@
-import Smart from "./smart";
+import Abstract from "./abstract";
 import {addClass, removeClass} from "../utils/common";
 import {SortType} from "../consts";
 
@@ -11,20 +11,16 @@ ${Object.entries(SortType).map(([, sortType]) => `
 </li>`).join(`\n`)}
 </ul>`;
 
-export default class Sorting extends Smart {
+export default class Sorting extends Abstract {
   constructor(sortType) {
     super();
 
-    this._data.currentSortType = sortType;
+    this._currentSortType = sortType;
     this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
   }
 
-  restoreHandlers() {
-    this.getElement().addEventListener(`click`, this._sortTypeChangeHandler);
-  }
-
   getTemplate() {
-    return getSortingHTML(this._data.currentSortType);
+    return getSortingHTML(this._currentSortType);
   }
 
   _sortTypeChangeHandler(evt) {

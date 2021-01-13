@@ -127,10 +127,9 @@ const getFilmDetailsHTML = (film) => {
 };
 
 export default class FilmDetails extends Smart {
-  constructor(film = BLANK_FILM, updateHandler) {
+  constructor(film = BLANK_FILM) {
     super();
     this._data = FilmDetails.parseFilmToData(film);
-    this._updateHandler = updateHandler;
     this._closeHandler = this._closeHandler.bind(this);
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
@@ -144,6 +143,10 @@ export default class FilmDetails extends Smart {
     this._setInnerHandlers();
   }
 
+  setUpdateHandler(callback) {
+    this._callback.update = callback;
+  }
+
   setDeleteCommentClickHandler(callback) {
     this._callback.deleteComment = callback;
   }
@@ -153,12 +156,12 @@ export default class FilmDetails extends Smart {
   }
 
   _addCommentHandler(comment) {
-    this._callback.addComment(comment);
+    this._callback.addComment(this._data.id, comment);
   }
 
   _deleteCommentClickHandler(evt) {
     evt.preventDefault();
-    this._callback.deleteComment(evt.currentTarget.dataset.commentId);
+    this._callback.deleteComment(this._data.id, evt.currentTarget.dataset.commentId);
   }
 
   getTemplate() {
@@ -234,7 +237,6 @@ export default class FilmDetails extends Smart {
           date: dayjs(),
           emotion: this._data.activeEmotion
         });
-        this.updateData({activeEmotion: null, writtenText: ``});
       }
     }
   }
@@ -246,17 +248,17 @@ export default class FilmDetails extends Smart {
 
   _watchlistClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(Category.WATCHLIST);
+    this._callback.update(this._data.id, Category.WATCHLIST);
   }
 
   _watchedClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(Category.WATCHED);
+    this._callback.update(this._data.id, Category.WATCHED);
   }
 
   _favouriteClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(Category.FAVOURITES);
+    this._callback.update(this._data.id, Category.FAVOURITES);
   }
 
   setCloseHandler(callback) {
