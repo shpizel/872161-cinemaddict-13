@@ -1,17 +1,15 @@
 import {getRandomNumber} from "./utils/common";
 
-
 export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
 const FILMS_COUNT_MIN = 15;
 const FILMS_COUNT_MAX = 20;
 export const FILMS_COUNT = getRandomNumber(FILMS_COUNT_MIN, FILMS_COUNT_MAX);
 export const FILMS_PER_PAGE = 5;
 export const EXTRA_FILMS_COUNT = 2;
-export const IS_AJAX_WORKS = getRandomNumber(0, 5) !== 0;
 export const LOADING_TIMEOUT = 300;
 
 
-export const Messages = {
+export const Message = {
   ALL_MOVIES: `All movies. Upcoming`,
   LOADING: `Loading...`,
   NO_MOVIES: `There are no movies in our database`
@@ -28,11 +26,11 @@ export const SortType = {
   RATING: `rating`
 };
 
-export const FilmFilter = {
+export const FilterType = {
   ALL: `All movies`,
   WATCHED: `Watchlist`,
   WATCHLIST: `History`,
-  FAVOURITE: `Favourites`
+  FAVOURITES: `Favourites`
 };
 
 export const Mode = {
@@ -56,7 +54,7 @@ export const BLANK_FILM = {
   title: ``,
   originalTitle: ``,
   director: ``,
-  writers: ``,
+  writers: [],
   releaseDate: ``,
   duration: 0,
   ageRating: 0,
@@ -72,15 +70,24 @@ export const BLANK_FILM = {
   isInFavourites: null
 };
 
-export const EMOTIONS = [
+export const EMOTION = [
   `smile`,
   `angry`,
   `puke`,
   `sleeping`,
 ];
 
-export const CATEGORIES = {
-  WATCHLIST: `watchlist`,
-  WATCHED: `watched`,
-  FAVOURITES: `favourites`
+export const Category = Object.assign({}, FilterType);
+
+export const UserAction = {
+  DELETE_COMMENT: `DELETE_COMMENT`,
+  ADD_COMMENT: `ADD_COMMENT`,
+  UPDATE_FILM_CATEGORY: `UPDATE_FILM_CATEGORY`,
+  UPDATE_FILTER: `UPDATE_FILTER`
+};
+
+export const UpdateType = {
+  PATCH: `PATCH`,
+  MINOR: `MINOR`,
+  MAJOR: `MAJOR`
 };

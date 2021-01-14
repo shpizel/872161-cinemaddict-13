@@ -1,25 +1,26 @@
 import Abstract from "./abstract";
 import {addClass, removeClass} from "../utils/common";
+import {SortType} from "../consts";
 
 const SORT_BUTTON_ACTIVE_CLASS = `sort__button--active`;
 
-const getSortingHTML = (items) => `<ul class="sort">
-${items.map(({sortType, isActive}) => `
+const getSortingHTML = (currentSortType) => `<ul class="sort">
+${Object.entries(SortType).map(([, sortType]) => `
 <li>
-    <a href="#" data-sort-type="${sortType}" class="sort__button${(isActive) ? ` ${SORT_BUTTON_ACTIVE_CLASS}` : ``}">Sort by ${sortType}</a>
+    <a href="#" data-sort-type="${sortType}" class="sort__button${(currentSortType === sortType) ? ` ${SORT_BUTTON_ACTIVE_CLASS}` : ``}">Sort by ${sortType}</a>
 </li>`).join(`\n`)}
 </ul>`;
 
 export default class Sorting extends Abstract {
-  constructor(items) {
+  constructor(sortType) {
     super();
 
-    this._items = items;
+    this._currentSortType = sortType;
     this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
   }
 
   getTemplate() {
-    return getSortingHTML(this._items);
+    return getSortingHTML(this._currentSortType);
   }
 
   _sortTypeChangeHandler(evt) {
@@ -42,6 +43,5 @@ export default class Sorting extends Abstract {
   setSortTypeChangeHandler(callback) {
     this._callback.sortTypeChange = callback;
     this.getElement().addEventListener(`click`, this._sortTypeChangeHandler);
-
   }
 }

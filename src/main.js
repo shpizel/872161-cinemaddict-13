@@ -1,42 +1,38 @@
-import {remove, render, RenderPosition} from './utils/render';
+import {render} from './utils/render';
 import Profile from './view/profile';
-import Menu from "./view/menu";
 import MoviesInside from "./view/movies-inside";
 import {getRandomFilm} from "./mock/film";
-import {getFilters} from "./mock/filters";
-import {
-  FILMS_COUNT,
-  IS_AJAX_WORKS,
-  LOADING_TIMEOUT
-} from "./consts";
+import {FILMS_COUNT, FilterType} from "./consts";
 import {getFilledList, mainNode, headerNode, footerStatsNode} from "./utils/common";
-import MovieListPresenter from "./presenter/movie-list";
+import FilmListPresenter from "./presenter/film-list";
+import FilmsModel from "./model/films";
+import FilterModel from "./model/filter";
+import MenuPresenter from "./presenter/menu";
+import {filter} from "./utils/film";
+import CommentsModel from "./model/comments";
 
-let films = [];
+const filmsList = getFilledList(FILMS_COUNT, getRandomFilm);
 
-let defaultMainMenu = new Menu(getFilters(films));
-render(defaultMainMenu, mainNode);
+const filmsModel = new FilmsModel();
+const filterModel = new FilterModel();
+const commentsModel = new CommentsModel();
 
-const movieListPresenter = new MovieListPresenter(mainNode);
+commentsModel.setComments(filmsList
+  .map((film) => ({[film.id]: film.comments}))
+  .reduce((prev, curr) => Object.assign(prev, curr))
+);
+filmsModel.setFilms(filmsList
+  .map((film) => {
+    delete film.comments;
+    return film;
+  })
+);
 
-const main = () => {
-  if (IS_AJAX_WORKS) {
-    films = getFilledList(FILMS_COUNT, getRandomFilm);
-  }
+const menuPresenter = new MenuPresenter(mainNode, filmsModel, filterModel);
+const filmListPresenter = new FilmListPresenter(mainNode, filmsModel, commentsModel, filterModel);
 
-  remove(defaultMainMenu);
+menuPresenter.init();
+filmListPresenter.init();
 
-  if (films.length > 0) {
-    render(new Profile(films.filter((film) => film.isAlreadyWatched).length), headerNode);
-    render(new Menu(getFilters(films)), mainNode, RenderPosition.AFTERBEGIN);
-  } else {
-    render(new Profile(0), headerNode);
-    render(new Menu(getFilters(films)), mainNode, RenderPosition.AFTERBEGIN);
-  }
-
-  movieListPresenter.init(films);
-
-  render(new MoviesInside(films.length), footerStatsNode);
-};
-
-setTimeout(main, LOADING_TIMEOUT);
+render(new Profile(filter[FilterType.WATCHED](filmsList).length), headerNode);
+render(new MoviesInside(filmsList.length), footerStatsNode);

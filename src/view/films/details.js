@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
+import he from "he";
 import {nanoid} from "nanoid";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
-import {BLANK_FILM, CATEGORIES, EMOTIONS} from "../../consts";
+import {BLANK_FILM, Category, EMOTION} from "../../consts";
 import {isNull, formatDate} from "../../utils/common";
 
 const getFilmDetailsHTML = (film) => {
@@ -87,30 +88,31 @@ const getFilmDetailsHTML = (film) => {
 
         <ul class="film-details__comments-list">
           ${film.comments.map((comment) => `
-<li class="film-details__comment">
-  <span class="film-details__comment-emoji">
-    <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
-  </span>
-  <div>
-    <p class="film-details__comment-text">${comment.comment}</p>
-    <p class="film-details__comment-info">
-      <span class="film-details__comment-author">${comment.author}</span>
-      <span class="film-details__comment-day">${formatDate(comment.date)}</span>
-      <button class="film-details__comment-delete">Delete</button>
-    </p>
-  </div>
-</li>`).join(`\n`)}
+          <li class="film-details__comment">
+            <span class="film-details__comment-emoji">
+              <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
+            </span>
+            <div>
+              <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
+              <p class="film-details__comment-info">
+                <span class="film-details__comment-author">${comment.author}</span>
+                <span class="film-details__comment-day">${formatDate(comment.date)}</span>
+                <button class="film-details__comment-delete" data-comment-id="${comment.id}">Delete</button>
+              </p>
+            </div>
+          </li>
+        `).join(`\n`)}
         </ul>
 
         <div class="film-details__new-comment">
           <div class="film-details__add-emoji-label">${(!isNull(film.activeEmotion) ? `<img src="images/emoji/${film.activeEmotion}.png" width="55" height="55" alt="emoji-smile">` : ``)}</div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"${(!film.activeEmotion) ? ` disabled` : ``}>${(film.writtenText.length > 0 && film.activeEmotion) ? film.writtenText : ``}</textarea>
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"${(!film.activeEmotion) ? ` disabled` : ``}>${(film.writtenText.length > 0 && film.activeEmotion) ? he.encode(film.writtenText) : ``}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
-            ${EMOTIONS.map((emotion) => `
+            ${EMOTION.map((emotion) => `
 <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}"${(film.activeEmotion === emotion) ? ` checked` : ``}>
 <label class="film-details__emoji-label" for="emoji-${emotion}">
   <img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">
@@ -125,20 +127,41 @@ const getFilmDetailsHTML = (film) => {
 };
 
 export default class FilmDetails extends Smart {
-  constructor(film = BLANK_FILM, updateHandler) {
+  constructor(film = BLANK_FILM) {
     super();
     this._data = FilmDetails.parseFilmToData(film);
-    this._updateHandler = updateHandler;
     this._closeHandler = this._closeHandler.bind(this);
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
     this._favouriteClickHandler = this._favouriteClickHandler.bind(this);
+    this._deleteCommentClickHandler = this._deleteCommentClickHandler.bind(this);
 
     this._emojiClickHandler = this._emojiClickHandler.bind(this);
     this._textareaInputHandler = this._textareaInputHandler.bind(this);
     this._textAreaKeydownHandler = this._textAreaKeydownHandler.bind(this);
 
     this._setInnerHandlers();
+  }
+
+  setUpdateHandler(callback) {
+    this._callback.update = callback;
+  }
+
+  setDeleteCommentClickHandler(callback) {
+    this._callback.deleteComment = callback;
+  }
+
+  setAddCommentClickHandler(callback) {
+    this._callback.addComment = callback;
+  }
+
+  _addCommentHandler(comment) {
+    this._callback.addComment(this._data.id, comment);
+  }
+
+  _deleteCommentClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteComment(this._data.id, evt.currentTarget.dataset.commentId);
   }
 
   getTemplate() {
@@ -149,9 +172,10 @@ export default class FilmDetails extends Smart {
     this._watchlistButtonNode.addEventListener(`click`, this._watchlistClickHandler);
     this._watchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
     this._favouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
-    Array.from(this._emotionsRadioNodes).forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
+    this._emotionsRadioNodes.forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
     this._textareaNode.addEventListener(`input`, this._textareaInputHandler);
     this._textareaNode.addEventListener(`keydown`, this._textAreaKeydownHandler);
+    this._deleteButtonNodes.forEach((node) => node.addEventListener(`click`, this._deleteCommentClickHandler));
   }
 
   updateData(update, justDataUpdate) {
@@ -206,15 +230,13 @@ export default class FilmDetails extends Smart {
     if ((evt.ctrlKey || evt.metaKey) && (evt.key === `Enter`)) {
       evt.preventDefault();
       if (this._data.activeEmotion && this._data.writtenText) {
-        const newComments = [...this._data.comments];
-        newComments.push({
+        this._addCommentHandler({
           id: nanoid(),
           author: `shpizel`,
           comment: this._data.writtenText,
           date: dayjs(),
           emotion: this._data.activeEmotion
         });
-        this.updateData({comments: newComments, activeEmotion: null, writtenText: ``});
       }
     }
   }
@@ -226,17 +248,17 @@ export default class FilmDetails extends Smart {
 
   _watchlistClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(CATEGORIES.WATCHLIST);
+    this._callback.update(this._data.id, Category.WATCHLIST);
   }
 
   _watchedClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(CATEGORIES.WATCHED);
+    this._callback.update(this._data.id, Category.WATCHED);
   }
 
   _favouriteClickHandler(evt) {
     evt.preventDefault();
-    this._updateHandler(CATEGORIES.FAVOURITES);
+    this._callback.update(this._data.id, Category.FAVOURITES);
   }
 
   setCloseHandler(callback) {
@@ -270,5 +292,9 @@ export default class FilmDetails extends Smart {
 
   get _emotionsRadioNodes() {
     return this.querySelectorAll(`.film-details__emoji-list > input`);
+  }
+
+  get _deleteButtonNodes() {
+    return this.querySelectorAll(`.film-details__comment-delete`);
   }
 }
