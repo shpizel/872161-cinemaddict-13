@@ -1,5 +1,5 @@
 import {createElement} from "../utils/render";
-import {isNull} from "../utils/common";
+import {addClass, isNull, removeClass} from "../utils/common";
 
 export default class Abstract {
   constructor() {
@@ -11,6 +11,14 @@ export default class Abstract {
     this._querySelector = null;
     this._querySelectorAll = null;
     this._callback = {};
+  }
+
+  show() {
+    removeClass(this.getElement(), `visually-hidden`);
+  }
+
+  hide() {
+    addClass(this.getElement(), `visually-hidden`);
   }
 
   contains(target) {

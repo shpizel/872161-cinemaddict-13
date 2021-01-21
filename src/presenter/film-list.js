@@ -26,6 +26,7 @@ import Sorting from "../view/sorting";
 import FilmsSection from "../view/films/section";
 import {filter} from "../utils/film";
 import FilmDetails from "../view/films/details";
+import CommentPresenter from "./comment";
 
 export default class FilmList {
   constructor(container, filmsModel, commentsModel, filterModel) {
@@ -50,6 +51,7 @@ export default class FilmList {
     this._filmDetails = new FilmDetails();
     this._filmDetails.setCloseHandler(this._closeFilmDetails);
     this._filmDetails.setUpdateHandler(this._filmUpdateHandler);
+    this._filmDetails.setCommentRenderHandler(this._renderFilmDetailsComments);
     this._filmDetails.setAddCommentClickHandler(this._handleCommentAdd);
     this._filmDetails.setDeleteCommentClickHandler(this._handleCommentDelete);
   }
@@ -73,14 +75,55 @@ export default class FilmList {
   }
 
   _closeFilmDetails() {
+    this._currentFilmId = null;
+    this._filmDetails.resetScroll();
     remove(this._filmDetails);
     unsetHideOverflow();
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
+  _clearFilmDetailsComments() {
+    this._commentPresenters.forEach((presenter) => presenter.destroy());
+    this._commentPresenters.clear();
+  }
+
+  _commentUpdateHandler(updateType, comment) {
+    switch (updateType) {
+      case UserAction.DELETE_COMMENT:
+        this._commentsModel.removeComment(this._currentFilmId, comment);
+        break;
+      default:
+        throw new Error(`Not implemented`);
+    }
+  }
+
+  _renderFilmDetailsComment(comment) {
+    const commentPresenter = new CommentPresenter(this._filmDetails.commentsContainer, this._commentUpdateHandler);
+    commentPresenter.init(comment);
+    this._commentPresenters.set(comment.id, commentPresenter);
+  }
+
+  _renderFilmDetailsComments(filmId) {
+    this._commentsModel.getCommentsByFilmId(filmId)
+      .then((comments) => {
+        this._clearFilmDetailsComments();
+        return comments;
+      })
+      .then((comments) => comments.forEach((comment) => this._renderFilmDetailsComment(comment)))
+      .then(() => this._filmDetails.restoreScrollTop())
+      .catch((err) => this._renderFilmDetailsComment(this._commentsModel.getErrorComment(err)))
+    ;
+  }
+
   _renderFilmDetails(filmId) {
     const film = this._filmsModel.getFilmById(filmId);
-    this._filmDetails.updateData(Object.assign({}, film, {comments: this._commentsModel.getCommentsByFilmId(filmId)}));
+    this._filmDetails.updateData(film);
+
+    if (this._currentFilmId !== filmId) {
+      this._filmDetails.resetUserInput();
+      this._currentFilmId = filmId;
+    }
+
     this._filmDetails.restoreHandlers();
     document.addEventListener(`keydown`, this._escKeyDownHandler);
     setHideOverflow();
@@ -101,10 +144,12 @@ export default class FilmList {
   }
 
   _prepareVariables() {
+    this._isLoading = true;
     this._showMoreButton = null;
     this._allMoviePresenters = new Map();
     this._topRatedMoviesPresenters = new Map();
     this._mostCommentedMoviesPresenters = new Map();
+    this._commentPresenters = new Map();
     this._renderedFilmsCount = FILMS_PER_PAGE;
     this._mode = Mode.DEFAULT;
   }
@@ -122,6 +167,8 @@ export default class FilmList {
     this._handleFilterModelEvent = this._handleFilterModelEvent.bind(this);
     this._handleCommentsModelEvent = this._handleCommentsModelEvent.bind(this);
     this._filmUpdateHandler = this._filmUpdateHandler.bind(this);
+    this._renderFilmDetailsComments = this._renderFilmDetailsComments.bind(this);
+    this._commentUpdateHandler = this._commentUpdateHandler.bind(this);
   }
 
   init() {
@@ -158,18 +205,22 @@ export default class FilmList {
       case UpdateType.MINOR:
         this._updateFilmCard(film);
         if (this._mode === Mode.POPUP) {
-          const comments = {comments: this._commentsModel.getCommentsByFilmId(film.id)};
-          this._filmDetails.updateData(Object.assign({}, film, comments));
+          this._filmDetails.updateData(film);
         }
         break;
       case UpdateType.MAJOR:
         this._updateFilmCard(film);
         if (this._mode === Mode.POPUP) {
-          const comments = {comments: this._commentsModel.getCommentsByFilmId(film.id), activeEmotion: null, writtenText: ``};
-          this._filmDetails.updateData(Object.assign({}, film, comments));
+          this._filmDetails.resetUserInput();
+          this._filmDetails.updateData(film);
         }
         break;
     }
+    this._commentsModel.getCommentsByFilmId(filmId).then((comments) => {
+      const commentsIds = comments.map((comment) => comment.id);
+      const updatedFilm = Object.assign({}, film, {comments: commentsIds});
+      this._filmsModel.updateFilm(UpdateType.PATCH, updatedFilm);
+    });
   }
 
   _handleFilterModelEvent(updateType) {
@@ -191,13 +242,18 @@ export default class FilmList {
       case UpdateType.PATCH:
         this._updateFilmCard(film);
         if (this._mode === Mode.POPUP) {
-          this._filmDetails.updateData(Object.assign({}, film, {comments: this._commentsModel.getCommentsByFilmId(film.id)}));
+          this._filmDetails.updateData(film);
         }
         break;
       case UpdateType.MINOR:
         if (this._mode === Mode.POPUP) {
-          this._filmDetails.updateData(Object.assign({}, film, {comments: this._commentsModel.getCommentsByFilmId(film.id)}));
+          this._filmDetails.updateData(film);
         }
+        this._clearBoard();
+        this._renderBoard();
+        break;
+      case UpdateType.INIT:
+        this._isLoading = false;
         this._clearBoard();
         this._renderBoard();
         break;
@@ -214,7 +270,7 @@ export default class FilmList {
     const filmId = film.id;
     this._getAllPresentersList().forEach((map) => {
       if (map.has(filmId)) {
-        map.get(filmId).init(film, this._commentsModel.getCommentsByFilmId(filmId).length);
+        map.get(filmId).init(film);
       }
     });
   }
@@ -305,7 +361,7 @@ export default class FilmList {
       const presenter = new FilmPresenter(container, this._handleFilmCategoryChange, this._renderFilmDetails);
       presentersStorage.set(film.id, presenter);
     }
-    presentersStorage.get(film.id).init(film, this._commentsModel.getCommentsByFilmId(film.id).length);
+    presentersStorage.get(film.id).init(film);
   }
 
   _showMoreButtonClickHandler() {
@@ -318,7 +374,7 @@ export default class FilmList {
     this._renderFilms(filmsSlice, this._filmsListContainer, this._allMoviePresenters);
 
     if (this._renderedFilmsCount >= filmsCount) {
-      remove(this._showMoreButton);
+      this._removeShowMoreButton();
     }
   }
 
@@ -330,6 +386,13 @@ export default class FilmList {
     this._showMoreButton = new ShowMoreButton();
     this._showMoreButton.setClickHandler(this._showMoreButtonClickHandler);
     render(this._showMoreButton, this._filmsListSection);
+  }
+
+  _removeShowMoreButton() {
+    if (isNull(this._showMoreButton)) {
+      return;
+    }
+    remove(this._showMoreButton);
   }
 
   _renderFilms(films, container, presentersStorage) {
@@ -398,14 +461,21 @@ export default class FilmList {
     render(this._sorting, this._container);
   }
 
+  _removeSorting() {
+    if (isNull(this._sorting)) {
+      return;
+    }
+    remove(this._sorting);
+  }
+
   _clearBoard({resetRenderedTasksCount = false, resetSortType = false} = {}) {
     const allPresenters = this._getAllPresentersList();
     allPresenters.forEach((currentPresentersMap) => {
       currentPresentersMap.forEach((presenter) => presenter.destroy());
       currentPresentersMap.clear();
     });
-    remove(this._showMoreButton);
-    remove(this._sorting);
+    this._removeShowMoreButton();
+    this._removeSorting();
     this._removeLayout();
     if (resetRenderedTasksCount) {
       this._renderedFilmsCount = FILMS_PER_PAGE;
@@ -416,6 +486,11 @@ export default class FilmList {
   }
 
   _renderBoard() {
+    if (this._isLoading) {
+      this._renderBaseLayout();
+      this._enableLoadingMessage();
+      return;
+    }
     const films = this._getFilms();
     const filmsCount = films.length;
 

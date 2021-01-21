@@ -89,5 +89,33 @@ export const UserAction = {
 export const UpdateType = {
   PATCH: `PATCH`,
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
+};
+
+export const HttpMethod = {
+  GET: `GET`,
+  PUT: `PUT`,
+  POST: `POST`,
+  DELETE: `DELETE`
+};
+
+export const SuccessStatusRange = makeInterval(200, 299);
+
+export const StatsPeriod = {
+  ALL: `all-time`,
+  TODAY: `day`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
+};
+
+export const getProfileRank = (count) => {
+  const rank = Object.entries(PROFILE_RANKS).find(([, {start, end}]) => count >= start && count <= end);
+  return (rank) ? rank[0] : ``;
+};
+
+export const SiteState = {
+  MOVIES: `MOVIES`,
+  STATS: `STATS`
 };

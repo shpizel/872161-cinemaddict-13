@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-// import {Category} from "../consts";
 
 export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
@@ -98,3 +97,4 @@ export const formatDate = (date) => {
 
   return `${years} year${(years > 1) ? `s` : ``} ago`;
 };
+

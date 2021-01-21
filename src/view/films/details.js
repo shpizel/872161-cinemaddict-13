@@ -4,7 +4,7 @@ import {nanoid} from "nanoid";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
 import {BLANK_FILM, Category, EMOTION} from "../../consts";
-import {isNull, formatDate} from "../../utils/common";
+import {isNull} from "../../utils/common";
 
 const getFilmDetailsHTML = (film) => {
   const duration = getFilmDuration(film.duration);
@@ -17,7 +17,7 @@ const getFilmDetailsHTML = (film) => {
       </div>
       <div class="film-details__info-wrap">
         <div class="film-details__poster">
-          <img class="film-details__poster-img" src="./images/posters/${film.poster}" alt="">
+          <img class="film-details__poster-img" src="${film.poster}" alt="">
           <p class="film-details__age">${film.ageRating}+</p>
         </div>
 
@@ -86,23 +86,7 @@ const getFilmDetailsHTML = (film) => {
       <section class="film-details__comments-wrap">
         <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.comments.length}</span></h3>
 
-        <ul class="film-details__comments-list">
-          ${film.comments.map((comment) => `
-          <li class="film-details__comment">
-            <span class="film-details__comment-emoji">
-              <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
-            </span>
-            <div>
-              <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
-              <p class="film-details__comment-info">
-                <span class="film-details__comment-author">${comment.author}</span>
-                <span class="film-details__comment-day">${formatDate(comment.date)}</span>
-                <button class="film-details__comment-delete" data-comment-id="${comment.id}">Delete</button>
-              </p>
-            </div>
-          </li>
-        `).join(`\n`)}
-        </ul>
+        <ul class="film-details__comments-list"></ul>
 
         <div class="film-details__new-comment">
           <div class="film-details__add-emoji-label">${(!isNull(film.activeEmotion) ? `<img src="images/emoji/${film.activeEmotion}.png" width="55" height="55" alt="emoji-smile">` : ``)}</div>
@@ -143,6 +127,10 @@ export default class FilmDetails extends Smart {
     this._setInnerHandlers();
   }
 
+  setCommentRenderHandler(callback) {
+    this._callback.renderComments = callback;
+  }
+
   setUpdateHandler(callback) {
     this._callback.update = callback;
   }
@@ -175,7 +163,6 @@ export default class FilmDetails extends Smart {
     this._emotionsRadioNodes.forEach((node) => node.addEventListener(`click`, this._emojiClickHandler));
     this._textareaNode.addEventListener(`input`, this._textareaInputHandler);
     this._textareaNode.addEventListener(`keydown`, this._textAreaKeydownHandler);
-    this._deleteButtonNodes.forEach((node) => node.addEventListener(`click`, this._deleteCommentClickHandler));
   }
 
   updateData(update, justDataUpdate) {
@@ -186,7 +173,8 @@ export default class FilmDetails extends Smart {
     }
     super.updateData(update, justDataUpdate);
     if (scrollManagerEnabled) {
-      this._restoreScrollTop();
+      this._callback.renderComments(this._data.id);
+      this.restoreScrollTop();
     }
   }
 
@@ -196,6 +184,18 @@ export default class FilmDetails extends Smart {
     this._watchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
     this._favouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
     this._setInnerHandlers();
+  }
+
+  resetScroll() {
+    this._data = Object.assign({}, this._data, {scrollTop: 0});
+  }
+
+  resetUserInput() {
+    this._data = Object.assign({}, this._data, {
+      activeEmotion: null,
+      writtenText: ``,
+      scrollTop: 0
+    });
   }
 
   static parseFilmToData(film) {
@@ -248,16 +248,20 @@ export default class FilmDetails extends Smart {
 
   _watchlistClickHandler(evt) {
     evt.preventDefault();
+    evt.target.disabled = true;
     this._callback.update(this._data.id, Category.WATCHLIST);
   }
 
   _watchedClickHandler(evt) {
     evt.preventDefault();
+    evt.target.disabled = true;
     this._callback.update(this._data.id, Category.WATCHED);
   }
 
   _favouriteClickHandler(evt) {
     evt.preventDefault();
+
+    evt.target.disabled = true;
     this._callback.update(this._data.id, Category.FAVOURITES);
   }
 
@@ -266,7 +270,7 @@ export default class FilmDetails extends Smart {
     this._closeButtonNode.addEventListener(`click`, this._closeHandler);
   }
 
-  _restoreScrollTop() {
+  restoreScrollTop() {
     this.getElement().scroll(0, this._data.scrollTop);
   }
 
@@ -294,7 +298,7 @@ export default class FilmDetails extends Smart {
     return this.querySelectorAll(`.film-details__emoji-list > input`);
   }
 
-  get _deleteButtonNodes() {
-    return this.querySelectorAll(`.film-details__comment-delete`);
+  get commentsContainer() {
+    return this.querySelector(`.film-details__comments-list`);
   }
 }

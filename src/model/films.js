@@ -1,13 +1,17 @@
 import Observer from "../utils/observer";
+import {UpdateType} from "../consts";
 
 export default class Films extends Observer {
-  constructor() {
+  constructor(api) {
     super();
+
+    this._api = api;
     this._films = [];
   }
 
   setFilms(films) {
     this._films = [...films];
+    this._notify(UpdateType.INIT, this._films);
   }
 
   getFilms() {
@@ -24,11 +28,15 @@ export default class Films extends Observer {
       throw new Error(`Film doesn't exist`);
     }
 
-    this._films = [
-      ...this._films.slice(0, index),
-      updatedFilm,
-      ...this._films.slice(index + 1)
-    ];
-    this._notify(updateType, updatedFilm);
+    return this._api.updateFilm(updatedFilm)
+      .then((filmFromServer) => {
+        this._films = [
+          ...this._films.slice(0, index),
+          filmFromServer,
+          ...this._films.slice(index + 1)
+        ];
+        this._notify(updateType, filmFromServer);
+      })
+    ;
   }
 }
