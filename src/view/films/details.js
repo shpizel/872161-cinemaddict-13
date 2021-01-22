@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import he from "he";
-import {nanoid} from "nanoid";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
 import {BLANK_FILM, Category, EMOTION} from "../../consts";
@@ -118,7 +117,6 @@ export default class FilmDetails extends Smart {
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
     this._favouriteClickHandler = this._favouriteClickHandler.bind(this);
-    this._deleteCommentClickHandler = this._deleteCommentClickHandler.bind(this);
 
     this._emojiClickHandler = this._emojiClickHandler.bind(this);
     this._textareaInputHandler = this._textareaInputHandler.bind(this);
@@ -135,21 +133,12 @@ export default class FilmDetails extends Smart {
     this._callback.update = callback;
   }
 
-  setDeleteCommentClickHandler(callback) {
-    this._callback.deleteComment = callback;
-  }
-
   setAddCommentClickHandler(callback) {
     this._callback.addComment = callback;
   }
 
   _addCommentHandler(comment) {
     this._callback.addComment(this._data.id, comment);
-  }
-
-  _deleteCommentClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.deleteComment(this._data.id, evt.currentTarget.dataset.commentId);
   }
 
   getTemplate() {
@@ -198,6 +187,10 @@ export default class FilmDetails extends Smart {
     });
   }
 
+  showFormError() {
+    this.shake(() => this.unlockForm());
+  }
+
   static parseFilmToData(film) {
     return Object.assign({}, film, {
       activeEmotion: null,
@@ -230,15 +223,28 @@ export default class FilmDetails extends Smart {
     if ((evt.ctrlKey || evt.metaKey) && (evt.key === `Enter`)) {
       evt.preventDefault();
       if (this._data.activeEmotion && this._data.writtenText) {
+        this.lockForm();
         this._addCommentHandler({
-          id: nanoid(),
-          author: `shpizel`,
           comment: this._data.writtenText,
           date: dayjs(),
           emotion: this._data.activeEmotion
         });
       }
     }
+  }
+
+  lockForm() {
+    this._textareaNode.disabled = true;
+    this._emotionsRadioNodes.forEach((node) => {
+      node.disabled = true;
+    });
+  }
+
+  unlockForm() {
+    this._textareaNode.disabled = false;
+    this._emotionsRadioNodes.forEach((node) => {
+      node.disabled = false;
+    });
   }
 
   _closeHandler(evt) {

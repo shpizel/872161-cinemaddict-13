@@ -1,5 +1,6 @@
 import {createElement} from "../utils/render";
 import {addClass, isNull, removeClass} from "../utils/common";
+import {SHAKE_DURATION} from "../consts";
 
 export default class Abstract {
   constructor() {
@@ -61,5 +62,16 @@ export default class Abstract {
     this._element = null;
     this._querySelector = null;
     this._querySelectorAll = null;
+  }
+
+  shake(callback = null) {
+    const commentView = this.getElement();
+    commentView.style.animation = `shake ${SHAKE_DURATION / 1000}s`;
+    setTimeout(() => {
+      commentView.style.animation = ``;
+      if (callback) {
+        callback();
+      }
+    }, SHAKE_DURATION);
   }
 }

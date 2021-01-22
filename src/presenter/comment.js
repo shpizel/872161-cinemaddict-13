@@ -1,4 +1,4 @@
-import {remove, render} from "../utils/render";
+import {remove, render, replace} from "../utils/render";
 import {UserAction} from "../consts";
 import CommentView from "../view/comment";
 
@@ -8,23 +8,33 @@ const DeleteButtonText = {
 };
 
 export default class Comment {
-  constructor(container, updateHandler) {
+  constructor(container, comment, updateHandler) {
     this._container = container;
+    this._comment = comment;
     this._updateHandler = updateHandler;
     this._isEnabled = true;
-
+    this._commentView = null;
     this._deleteComment = this._deleteComment.bind(this);
   }
 
-  init(comment) {
-    this._comment = comment;
-    this._commentView = new CommentView(comment);
+  init() {
+    const prevCommentView = this._commentView;
+    this._commentView = new CommentView(this._comment);
     this._commentView.setDeleteButtonClickHandler(this._deleteComment);
-    render(this._commentView, this._container);
+    if (!prevCommentView) {
+      render(this._commentView, this._container);
+      return;
+    }
+    replace(this._commentView, prevCommentView);
+    remove(prevCommentView);
   }
 
   destroy() {
     remove(this._commentView);
+  }
+
+  setAborting() {
+    this._commentView.shake(() => this.init());
   }
 
   _deleteComment(deleteButtonNode) {

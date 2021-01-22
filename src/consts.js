@@ -1,12 +1,7 @@
-import {getRandomNumber} from "./utils/common";
-
+export const SHAKE_DURATION = 500;
 export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
-const FILMS_COUNT_MIN = 15;
-const FILMS_COUNT_MAX = 20;
-export const FILMS_COUNT = getRandomNumber(FILMS_COUNT_MIN, FILMS_COUNT_MAX);
 export const FILMS_PER_PAGE = 5;
 export const EXTRA_FILMS_COUNT = 2;
-export const LOADING_TIMEOUT = 300;
 
 
 export const Message = {

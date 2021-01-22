@@ -91,7 +91,7 @@ export default class Api {
       isInWatchlist: serverFilmObject.user_details.watchlist,
       isAlreadyWatched: serverFilmObject.user_details.already_watched,
       isInFavourites: serverFilmObject.user_details.favorite,
-      watchingDate: serverFilmObject.user_details.watching_date
+      watchingDate: new Date(serverFilmObject.user_details.watching_date)
     };
 
     return adaptedFilm;
@@ -121,7 +121,7 @@ export default class Api {
       'user_details': {
         'watchlist': clientFilmObject.isInWatchlist,
         'already_watched': clientFilmObject.isAlreadyWatched,
-        'watching_date': clientFilmObject.watchingDate,
+        'watching_date': clientFilmObject.watchingDate.toISOString(),
         'favorite': clientFilmObject.isInFavourites,
       }
     };

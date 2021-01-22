@@ -65,7 +65,7 @@ export const isNull = (value) => value === null;
 export const releaseDateComparator = (a, b) => dayjs(b.releaseDate).diff(dayjs(a.releaseDate));
 export const ratingComparator = (a, b) => b.rating - a.rating;
 
-export const commentsCountComparator = (a, b) => b.commentsCount - a.commentsCount;
+export const commentsCountComparator = (a, b) => b.comments.length - a.comments.length;
 
 export const formatDate = (date) => {
   const dt = dayjs(date);

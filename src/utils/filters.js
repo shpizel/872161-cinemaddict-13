@@ -8,6 +8,7 @@ const getFilter = (name, isActive, counter) => {
     counter
   };
 };
+
 export const getFilters = (films, activeFilter = FilterType.ALL) => {
   return Object.entries(FilterType).map(([, value]) => {
     return getFilter(value, activeFilter === value, (value !== FilterType.ALL) ? filter[value](films).length : null);

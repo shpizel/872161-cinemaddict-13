@@ -6,6 +6,8 @@ import Smart from "./smart";
 import {filter} from "../utils/film";
 import {capitalize} from "../utils/common";
 
+const genres = new Map();
+
 const renderChart = (statisticCtx) => {
   const sortedGenres = [...genres].sort((previous, current) => current[1] - previous[1]);
   genres.clear();
@@ -75,20 +77,19 @@ const renderChart = (statisticCtx) => {
   });
 };
 
-const genres = new Map();
-const createStats = (data) => {
+const getStatsHTML = (data) => {
   let chosenPeriodTime;
   if (data.period === StatsPeriod.ALL) {
     chosenPeriodTime = -Infinity;
   } else {
-    chosenPeriodTime = dayjs().subtract(1, `${data.period}`);
+    chosenPeriodTime = dayjs().subtract(1, data.period);
   }
 
   let filmsWatched = 0;
   let totalMinutesDuration = 0;
 
   data.films.forEach((film) => {
-    if (film.isAlreadyWatched && +new Date(film.watchingDate) > chosenPeriodTime) {
+    if (film.isAlreadyWatched && film.watchingDate > chosenPeriodTime) {
       filmsWatched++;
       totalMinutesDuration += film.duration;
       film.genres.forEach((currentGenre) => {
@@ -190,7 +191,7 @@ export default class Stats extends Smart {
   }
 
   getTemplate() {
-    return createStats(this._data);
+    return getStatsHTML(this._data);
   }
 
   removeElement() {

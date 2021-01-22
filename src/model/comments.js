@@ -9,10 +9,6 @@ export default class Comments extends Observer {
     this._comments = {};
   }
 
-  setComments(comments) {
-    this._comments = Object.assign({}, comments);
-  }
-
   getCommentsByFilmId(filmId) {
     if (!this._comments.hasOwnProperty(filmId)) {
       return this._api.getComments(filmId)
