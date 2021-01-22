@@ -49,5 +49,5 @@ api.getFilms()
   .then((films) => {
     filmsModel.setFilms(films);
   })
-  .catch(filmsModel.setFilms([]))
+  .catch(() => filmsModel.setFilms([]))
 ;

@@ -485,6 +485,7 @@ export default class FilmList {
       this._enableLoadingMessage();
       return;
     }
+
     const films = this._getFilms();
     const filmsCount = films.length;
 
@@ -493,6 +494,7 @@ export default class FilmList {
       this._enableNoMoviesMessage();
       return;
     }
+
     this._renderSorting();
     this._renderBaseLayout();
     this._renderFilmsContainer();
