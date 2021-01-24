@@ -1,4 +1,4 @@
-import {remove, render, replace} from "../utils/render";
+import {remove, render, replace, shake} from "../utils/render";
 import {UserAction} from "../consts";
 import CommentView from "../view/comment";
 
@@ -25,6 +25,7 @@ export default class Comment {
       render(this._commentView, this._container);
       return;
     }
+
     replace(this._commentView, prevCommentView);
     remove(prevCommentView);
   }
@@ -33,8 +34,8 @@ export default class Comment {
     remove(this._commentView);
   }
 
-  setAborting() {
-    this._commentView.shake(() => this.init());
+  showError() {
+    shake(this._commentView.getElement(), () => this.init());
   }
 
   _deleteComment(deleteButtonNode) {

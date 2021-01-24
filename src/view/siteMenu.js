@@ -1,7 +1,7 @@
 import Abstract from "./abstract";
 import {isNull} from "../utils/common";
 
-const getMenuHTML = (filters, isStatsEnabled) => `<nav class="main-navigation">
+const getSiteMenuHTML = (filters, isStatsEnabled) => `<nav class="main-navigation">
   <div class="main-navigation__items">
 ${filters.map(({name, isActive, counter}) => `
     <a href="#" data-filter-type="${name}" class="main-navigation__item${(isActive && !isStatsEnabled) ? ` main-navigation__item--active` : ``}">${name}${(!isNull(counter)) ? ` <span class="main-navigation__item-count">${counter}</span>` : ``}</a>
@@ -10,7 +10,7 @@ ${filters.map(({name, isActive, counter}) => `
   <a href="#stats" class="main-navigation__additional${(isStatsEnabled) ? ` main-navigation__item--active` : ``}">Stats</a>
 </nav>`;
 
-export default class Menu extends Abstract {
+export default class SiteMenu extends Abstract {
   constructor(filters, isStatsEnabled) {
     super();
     this._filters = filters;
@@ -20,7 +20,7 @@ export default class Menu extends Abstract {
   }
 
   getTemplate() {
-    return getMenuHTML(this._filters, this._isStatsEnabled);
+    return getSiteMenuHTML(this._filters, this._isStatsEnabled);
   }
 
   _menuClickHandler(evt) {

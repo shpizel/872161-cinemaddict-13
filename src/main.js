@@ -2,7 +2,7 @@ import {mainNode, headerNode, footerStatsNode} from "./utils/common";
 import FilmListPresenter from "./presenter/film-list";
 import FilmsModel from "./model/films";
 import FilterModel from "./model/filter";
-import MenuPresenter from "./presenter/menu";
+import MainMenuPresenter from "./presenter/main-menu";
 import CommentsModel from "./model/comments";
 import Api from "./utils/api";
 import FilmsCounterPresenter from "./presenter/films-counter";
@@ -38,7 +38,7 @@ const siteStateChangeHandler = (state) => {
   }
 };
 
-const menuPresenter = new MenuPresenter(mainNode, filmsModel, filterModel, siteStateChangeHandler);
+const menuPresenter = new MainMenuPresenter(mainNode, filmsModel, filterModel, siteStateChangeHandler);
 const filmsCounterPresenter = new FilmsCounterPresenter(footerStatsNode, filmsModel);
 const profilePresenter = new ProfilePresenter(headerNode, filmsModel);
 
@@ -46,8 +46,6 @@ const presenters = [profilePresenter, menuPresenter, filmListPresenter, filmsCou
 presenters.forEach((presenter) => presenter.init());
 
 api.getFilms()
-  .then((films) => {
-    filmsModel.setFilms(films);
-  })
+  .then((films) => filmsModel.setFilms(films))
   .catch(() => filmsModel.setFilms([]))
 ;

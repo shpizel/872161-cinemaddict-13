@@ -4,6 +4,7 @@ import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
 import {BLANK_FILM, Category, EMOTION} from "../../consts";
 import {isNull} from "../../utils/common";
+import {shake} from "../../utils/render";
 
 const getFilmDetailsHTML = (film) => {
   const duration = getFilmDuration(film.duration);
@@ -187,8 +188,8 @@ export default class FilmDetails extends Smart {
     });
   }
 
-  showFormError() {
-    this.shake(() => this.unlockForm());
+  showError() {
+    shake(this.getElement(), () => this.unlockForm());
   }
 
   static parseFilmToData(film) {
@@ -254,20 +255,16 @@ export default class FilmDetails extends Smart {
 
   _watchlistClickHandler(evt) {
     evt.preventDefault();
-    evt.target.disabled = true;
     this._callback.update(this._data.id, Category.WATCHLIST);
   }
 
   _watchedClickHandler(evt) {
     evt.preventDefault();
-    evt.target.disabled = true;
     this._callback.update(this._data.id, Category.WATCHED);
   }
 
   _favouriteClickHandler(evt) {
     evt.preventDefault();
-
-    evt.target.disabled = true;
     this._callback.update(this._data.id, Category.FAVOURITES);
   }
 

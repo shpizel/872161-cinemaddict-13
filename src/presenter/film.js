@@ -31,8 +31,8 @@ export default class Film {
 
   init(film) {
     this._film = film;
-    this._prevFilmCard = this._filmCard;
 
+    this._prevFilmCard = this._filmCard;
     this._filmCard = new FilmCard(this._film);
     this._initFilmCardHandlers();
 

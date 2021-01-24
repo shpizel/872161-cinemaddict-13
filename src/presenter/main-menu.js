@@ -1,14 +1,16 @@
-import MenuView from "../view/menu";
+import MenuView from "../view/siteMenu";
 import {remove, render, RenderPosition, replace} from "../utils/render";
 import {SiteState, UpdateType} from "../consts";
 import {getFilters} from "../utils/filters";
+import {isNull} from "../utils/common";
 
-export default class Menu {
+export default class MainMenu {
   constructor(container, filmsModel, filterModel, stateChangeHandler) {
     this._container = container;
     this._filmsModel = filmsModel;
     this._filterModel = filterModel;
     this._stateChangeHandler = stateChangeHandler;
+    this._siteMenu = null;
     this._isStatsEnabled = false;
 
     this._changeFilterHandler = this._changeFilterHandler.bind(this);
@@ -20,19 +22,19 @@ export default class Menu {
   }
 
   init() {
-    const prevMenu = this._menu;
+    const prevSiteMenu = this._siteMenu;
+    const filters = getFilters(this._filmsModel.getFilms(), this._filterModel.getFilter());
+    this._siteMenu = new MenuView(filters, this._isStatsEnabled);
+    this._siteMenu.setMenuClickHandler(this._changeFilterHandler);
+    this._siteMenu.setStatsClickHandler(this._showStatsHandler);
 
-    this._menu = new MenuView(getFilters(this._filmsModel.getFilms(), this._filterModel.getFilter()), this._isStatsEnabled);
-    this._menu.setMenuClickHandler(this._changeFilterHandler);
-    this._menu.setStatsClickHandler(this._showStatsHandler);
-
-    if (!prevMenu) {
-      render(this._menu, this._container, RenderPosition.AFTERBEGIN);
+    if (isNull(prevSiteMenu)) {
+      render(this._siteMenu, this._container, RenderPosition.AFTERBEGIN);
       return;
     }
 
-    replace(this._menu, prevMenu);
-    remove(prevMenu);
+    replace(this._siteMenu, prevSiteMenu);
+    remove(prevSiteMenu);
   }
 
   _handleModelEvent() {

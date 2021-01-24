@@ -95,7 +95,10 @@ export const HttpMethod = {
   DELETE: `DELETE`
 };
 
-export const SuccessStatusRange = makeInterval(200, 299);
+export const SuccessStatusRange = {
+  START: 200,
+  END: 299
+};
 
 export const StatsPeriod = {
   ALL: `all-time`,

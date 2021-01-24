@@ -53,4 +53,16 @@ export default class Comments extends Observer {
       comment: `Не удалось загрузить комментарии. (${errorMsg})`
     };
   }
+
+  static adaptCommentToClient(serverCommentObject) {
+    const date = new Date(serverCommentObject.date);
+    const adaptedComment = Object.assign({}, serverCommentObject, {date});
+    return adaptedComment;
+  }
+
+  static adaptCommentToServer(clientCommentObject) {
+    const date = clientCommentObject.date.toISOString();
+    const adaptedComment = Object.assign({}, clientCommentObject, {date});
+    return adaptedComment;
+  }
 }

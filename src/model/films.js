@@ -39,4 +39,62 @@ export default class Films extends Observer {
       })
     ;
   }
+
+  static adaptFilmToClient(serverFilmObject) {
+    const adaptedFilm = {
+      id: serverFilmObject.id,
+      comments: serverFilmObject.comments,
+      title: serverFilmObject.film_info.title,
+      originalTitle: serverFilmObject.film_info.alternative_title,
+      rating: serverFilmObject.film_info.total_rating,
+      poster: serverFilmObject.film_info.poster,
+      ageRating: serverFilmObject.film_info.age_rating,
+      director: serverFilmObject.film_info.director,
+      writers: serverFilmObject.film_info.writers,
+      actors: serverFilmObject.film_info.actors,
+      releaseDate: new Date(serverFilmObject.film_info.release.date),
+      country: serverFilmObject.film_info.release.release_country,
+      duration: serverFilmObject.film_info.runtime,
+      genres: serverFilmObject.film_info.genre,
+      description: serverFilmObject.film_info.description,
+      isInWatchlist: serverFilmObject.user_details.watchlist,
+      isAlreadyWatched: serverFilmObject.user_details.already_watched,
+      isInFavourites: serverFilmObject.user_details.favorite,
+      watchingDate: new Date(serverFilmObject.user_details.watching_date)
+    };
+
+    return adaptedFilm;
+  }
+
+  static adaptFilmToServer(clientFilmObject) {
+    const adaptedFilm = {
+      'id': clientFilmObject.id,
+      'comments': clientFilmObject.comments,
+      'film_info': {
+        'title': clientFilmObject.title,
+        'alternative_title': clientFilmObject.originalTitle,
+        'total_rating': clientFilmObject.rating,
+        'poster': clientFilmObject.poster,
+        'age_rating': clientFilmObject.ageRating,
+        'director': clientFilmObject.director,
+        'writers': clientFilmObject.writers,
+        'actors': clientFilmObject.actors,
+        'release': {
+          'date': clientFilmObject.releaseDate.toISOString(),
+          'release_country': clientFilmObject.country
+        },
+        'runtime': clientFilmObject.duration,
+        'genre': clientFilmObject.genres,
+        'description': clientFilmObject.description
+      },
+      'user_details': {
+        'watchlist': clientFilmObject.isInWatchlist,
+        'already_watched': clientFilmObject.isAlreadyWatched,
+        'watching_date': clientFilmObject.watchingDate.toISOString(),
+        'favorite': clientFilmObject.isInFavourites,
+      }
+    };
+
+    return adaptedFilm;
+  }
 }
