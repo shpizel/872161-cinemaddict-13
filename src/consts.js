@@ -1,12 +1,7 @@
-import {getRandomNumber} from "./utils/common";
-
+export const SHAKE_DURATION = 500;
 export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
-const FILMS_COUNT_MIN = 15;
-const FILMS_COUNT_MAX = 20;
-export const FILMS_COUNT = getRandomNumber(FILMS_COUNT_MIN, FILMS_COUNT_MAX);
 export const FILMS_PER_PAGE = 5;
 export const EXTRA_FILMS_COUNT = 2;
-export const LOADING_TIMEOUT = 300;
 
 
 export const Message = {
@@ -89,5 +84,36 @@ export const UserAction = {
 export const UpdateType = {
   PATCH: `PATCH`,
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
+};
+
+export const HttpMethod = {
+  GET: `GET`,
+  PUT: `PUT`,
+  POST: `POST`,
+  DELETE: `DELETE`
+};
+
+export const SuccessStatusRange = {
+  START: 200,
+  END: 299
+};
+
+export const StatsPeriod = {
+  ALL: `all-time`,
+  TODAY: `day`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
+};
+
+export const getProfileRank = (count) => {
+  const rank = Object.entries(PROFILE_RANKS).find(([, {start, end}]) => count >= start && count <= end);
+  return (rank) ? rank[0] : ``;
+};
+
+export const SiteState = {
+  MOVIES: `MOVIES`,
+  STATS: `STATS`
 };

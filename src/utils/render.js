@@ -1,6 +1,6 @@
 import Abstract from "../view/abstract";
 import {addClass, bodyNode, isNull, removeClass} from "./common";
-import {HIDE_OVERFLOW_CLASSNAME} from "../consts";
+import {HIDE_OVERFLOW_CLASSNAME, SHAKE_DURATION} from "../consts";
 
 export const RenderPosition = {
   AFTERBEGIN: `afterbegin`,
@@ -58,5 +58,17 @@ export const remove = (component) => {
   component.getElement().remove();
   component.removeElement();
 };
+
 export const setHideOverflow = () => addClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
+
 export const unsetHideOverflow = () => removeClass(bodyNode, HIDE_OVERFLOW_CLASSNAME);
+
+export const shake = (element, callback = null) => {
+  element.style.animation = `shake ${SHAKE_DURATION / 1000}s`;
+  setTimeout(() => {
+    element.style.animation = ``;
+    if (callback) {
+      callback();
+    }
+  }, SHAKE_DURATION);
+};

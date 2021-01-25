@@ -29,12 +29,11 @@ export default class Film {
     this._handleWatchlistClick = this._handleWatchlistClick.bind(this);
   }
 
-  init(film, commentsCount) {
+  init(film) {
     this._film = film;
-    this._commentsCount = commentsCount;
-    this._prevFilmCard = this._filmCard;
 
-    this._filmCard = new FilmCard(this._film, this._commentsCount);
+    this._prevFilmCard = this._filmCard;
+    this._filmCard = new FilmCard(this._film);
     this._initFilmCardHandlers();
 
     if (isNull(this._prevFilmCard)) {
@@ -45,18 +44,6 @@ export default class Film {
     replace(this._filmCard, this._prevFilmCard);
     remove(this._prevFilmCard);
   }
-
-  // _handleModelEvent(actionType) {
-  //   // const comments = this._commentsModel.getComments();
-  //   switch (actionType) {
-  //     case UserAction.ADD_COMMENT:
-  //     case UserAction.DELETE_COMMENT:
-  //       this._filmDetails.updateData({comments});
-  //       break;
-  //     default:
-  //       throw new Error(`Invalid actionType: ${actionType}`);
-  //   }
-  // }
 
   _initFilmCardHandlers() {
     this._filmCard.setClickHandler(this._renderFilmDetails);
