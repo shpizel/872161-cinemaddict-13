@@ -20,7 +20,6 @@ export default class Film {
   _prepareVariables() {
     this._film = null;
     this._filmCard = null;
-    this._prevFilmCard = null;
   }
 
   _prepareHandlers() {
@@ -32,17 +31,17 @@ export default class Film {
   init(film) {
     this._film = film;
 
-    this._prevFilmCard = this._filmCard;
+    const prevFilmCard = this._filmCard;
     this._filmCard = new FilmCard(this._film);
     this._initFilmCardHandlers();
 
-    if (isNull(this._prevFilmCard)) {
+    if (isNull(prevFilmCard)) {
       render(this._filmCard, this._container);
       return;
     }
 
-    replace(this._filmCard, this._prevFilmCard);
-    remove(this._prevFilmCard);
+    replace(this._filmCard, prevFilmCard);
+    remove(prevFilmCard);
   }
 
   _initFilmCardHandlers() {

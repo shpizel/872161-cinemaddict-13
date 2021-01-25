@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import he from "he";
 import {getFilmDuration} from "../../utils/film";
 import Smart from "../smart";
-import {BLANK_FILM, Category, EMOTION} from "../../consts";
+import {BLANK_FILM, Category, EMOTIONS} from "../../consts";
 import {isNull} from "../../utils/common";
 import {shake} from "../../utils/render";
 
@@ -96,7 +96,7 @@ const getFilmDetailsHTML = (film) => {
           </label>
 
           <div class="film-details__emoji-list">
-            ${EMOTION.map((emotion) => `
+            ${EMOTIONS.map((emotion) => `
 <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emotion}" value="${emotion}"${(film.activeEmotion === emotion) ? ` checked` : ``}>
 <label class="film-details__emoji-label" for="emoji-${emotion}">
   <img src="./images/emoji/${emotion}.png" width="30" height="30" alt="emoji">
@@ -106,8 +106,7 @@ const getFilmDetailsHTML = (film) => {
       </section>
     </div>
   </form>
-</section>
-`;
+</section>`;
 };
 
 export default class FilmDetails extends Smart {
@@ -118,7 +117,6 @@ export default class FilmDetails extends Smart {
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
     this._favouriteClickHandler = this._favouriteClickHandler.bind(this);
-
     this._emojiClickHandler = this._emojiClickHandler.bind(this);
     this._textareaInputHandler = this._textareaInputHandler.bind(this);
     this._textAreaKeydownHandler = this._textAreaKeydownHandler.bind(this);
@@ -139,6 +137,7 @@ export default class FilmDetails extends Smart {
   }
 
   _addCommentHandler(comment) {
+    this.lockForm();
     this._callback.addComment(this._data.id, comment);
   }
 
@@ -200,14 +199,6 @@ export default class FilmDetails extends Smart {
     });
   }
 
-  static parseDataToFilm(data) {
-    data = Object.assign({}, data);
-    delete data.activeEmotion;
-    delete data.writtenText;
-    delete data.scrollTop;
-    return data;
-  }
-
   _emojiClickHandler(evt) {
     const activeEmotion = evt.target.value;
     if (activeEmotion !== this._data.activeEmotion) {
@@ -224,7 +215,6 @@ export default class FilmDetails extends Smart {
     if ((evt.ctrlKey || evt.metaKey) && (evt.key === `Enter`)) {
       evt.preventDefault();
       if (this._data.activeEmotion && this._data.writtenText) {
-        this.lockForm();
         this._addCommentHandler({
           comment: this._data.writtenText,
           date: dayjs(),
@@ -301,7 +291,7 @@ export default class FilmDetails extends Smart {
     return this.querySelectorAll(`.film-details__emoji-list > input`);
   }
 
-  get commentsContainer() {
+  get commentsContainerNode() {
     return this.querySelector(`.film-details__comments-list`);
   }
 }

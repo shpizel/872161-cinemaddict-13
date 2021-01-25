@@ -18,7 +18,9 @@ import {
   commentsCountComparator,
   releaseDateComparator,
   isNull,
-  ratingComparator, footerNode, makeEscKeyDownHandler
+  ratingComparator,
+  footerNode,
+  makeEscKeyDownHandler
 } from "../utils/common";
 import FilmsListSection from "../view/films/list/section";
 import FilmPresenter from "./film";
@@ -27,6 +29,7 @@ import FilmsSection from "../view/films/section";
 import {filter} from "../utils/film";
 import FilmDetails from "../view/films/details";
 import CommentPresenter from "./comment";
+import CommentsModel from "../model/comments";
 
 export default class FilmList {
   constructor(container, filmsModel, commentsModel, filterModel) {
@@ -138,12 +141,12 @@ export default class FilmList {
         ;
         break;
       default:
-        throw new Error(`Not implemented`);
+        throw new Error(`Invalid update type: ${updateType}`);
     }
   }
 
   _renderFilmDetailsComment(comment) {
-    const commentPresenter = new CommentPresenter(this._filmDetails.commentsContainer, comment, this._commentUpdateHandler);
+    const commentPresenter = new CommentPresenter(this._filmDetails.commentsContainerNode, comment, this._commentUpdateHandler);
     this._commentPresenters.set(comment.id, commentPresenter);
     commentPresenter.init();
   }
@@ -156,7 +159,7 @@ export default class FilmList {
       })
       .then((comments) => comments.forEach((comment) => this._renderFilmDetailsComment(comment)))
       .then(() => this._filmDetails.restoreScrollTop())
-      .catch((err) => this._renderFilmDetailsComment(this._commentsModel.getErrorComment(err)))
+      .catch((err) => this._renderFilmDetailsComment(CommentsModel.getErrorComment(err)))
     ;
   }
 
@@ -172,7 +175,7 @@ export default class FilmList {
     this._filmDetails.restoreHandlers();
     document.addEventListener(`keydown`, this._escKeyDownHandler);
     setHideOverflow();
-    render(this._filmDetails, footerNode, RenderPosition.BEFOREEND);
+    render(this._filmDetails, footerNode, RenderPosition.BEFORE_END);
     this._mode = Mode.POPUP;
   }
 
@@ -220,6 +223,7 @@ export default class FilmList {
         }
         break;
     }
+
     this._commentsModel.getCommentsByFilmId(filmId).then((comments) => {
       const commentsIds = comments.map((comment) => comment.id);
       const updatedFilm = Object.assign({}, film, {comments: commentsIds});
@@ -306,13 +310,7 @@ export default class FilmList {
 
   _enableAllMoviesMessage() {
     if (!this._filmsListSection.contains(this._allMoviesFilmsListTitle)) {
-      render(this._allMoviesFilmsListTitle, this._filmsListSection, RenderPosition.AFTERBEGIN);
-    }
-  }
-
-  _disableAllMoviesMessage() {
-    if (this._filmsListSection.getElement().contains(this._allMoviesFilmsListTitle.getElement())) {
-      remove(this._allMoviesFilmsListTitle);
+      render(this._allMoviesFilmsListTitle, this._filmsListSection, RenderPosition.AFTER_BEGIN);
     }
   }
 

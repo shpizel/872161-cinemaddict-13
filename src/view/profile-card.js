@@ -1,6 +1,5 @@
 import Abstract from "./abstract";
-import {capitalize} from "../utils/common";
-import {getProfileRank} from "../consts";
+import {capitalize, getProfileRank} from "../utils/common";
 
 const getProfileCardHTML = (filmsWatched) => {
   return `<section class="header__profile profile">

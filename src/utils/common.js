@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
-
-export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+import {PROFILE_RANKS} from "../consts";
 
 export const capitalize = (string) => {
   if ((typeof string !== `string`) || (string.length === 0)) {
@@ -9,13 +8,9 @@ export const capitalize = (string) => {
   return `${string.charAt(0).toUpperCase()}${string.slice(1).toLowerCase()}`;
 };
 
-export const addClass = (element, className) => {
-  element.classList.add(className);
-};
+export const addClass = (element, className) => element.classList.add(className);
 
-export const removeClass = (element, className) => {
-  element.classList.remove(className);
-};
+export const removeClass = (element, className) => element.classList.remove(className);
 
 export const bodyNode = document.querySelector(`body`);
 export const headerNode = document.querySelector(`header`);
@@ -73,3 +68,7 @@ export const formatDate = (date) => {
   return `${years} year${(years > 1) ? `s` : ``} ago`;
 };
 
+export const getProfileRank = (filmsCount) => {
+  const [rank] = Object.entries(PROFILE_RANKS).find(([, {start, end}]) => filmsCount >= start && filmsCount <= end);
+  return rank;
+};

@@ -31,7 +31,7 @@ export default class SiteMenu extends Abstract {
 
   setMenuClickHandler(callback) {
     this._callback.click = callback;
-    this._menuItems.forEach((node) => node.addEventListener(`click`, this._menuClickHandler));
+    this._menuItemsNodes.forEach((node) => node.addEventListener(`click`, this._menuClickHandler));
   }
 
   _statsClickHandler(evt) {
@@ -44,7 +44,7 @@ export default class SiteMenu extends Abstract {
     this._statsNode.addEventListener(`click`, this._statsClickHandler);
   }
 
-  get _menuItems() {
+  get _menuItemsNodes() {
     return this.querySelectorAll(`.main-navigation__item`);
   }
 

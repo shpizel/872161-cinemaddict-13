@@ -1,4 +1,4 @@
-import {HttpMethod, SuccessStatusRange} from "../consts";
+import {HttpMethod, HttpSuccessStatusRange} from "../consts";
 import FilmsModel from "../model/films";
 import CommentsModel from "../model/comments";
 
@@ -19,7 +19,7 @@ export default class Api {
   }
 
   _checkStatus(response) {
-    if (response.status < SuccessStatusRange.START || response.status > SuccessStatusRange.END) {
+    if (response.status < HttpSuccessStatusRange.START || response.status > HttpSuccessStatusRange.END) {
       throw new Error(`${response.status}: ${response.statusText}`);
     }
     return response;

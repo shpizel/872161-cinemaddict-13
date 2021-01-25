@@ -2,7 +2,7 @@ import {remove, render, replace} from "../utils/render";
 import {filter} from "../utils/film";
 import {FilterType} from "../consts";
 import {isNull} from "../utils/common";
-import ProfileCard from "../view/profileCard";
+import ProfileCard from "../view/profile-card";
 
 export default class Profile {
   constructor(container, filmsModel) {

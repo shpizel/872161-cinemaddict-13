@@ -18,7 +18,7 @@ export default class Comments extends Observer {
         })
       ;
     }
-    return new Promise((resolve) => resolve(this._comments[filmId]));
+    return Promise.resolve(this._comments[filmId]);
   }
 
   addComment(filmId, comment) {
@@ -26,15 +26,17 @@ export default class Comments extends Observer {
       this._comments[filmId] = [];
     }
 
-    return this._api.addComment(filmId, comment).then((commentsFromServer) => {
-      this._comments[filmId] = commentsFromServer;
-      this._notify(UpdateType.MAJOR, filmId);
-    });
+    return this._api.addComment(filmId, comment)
+      .then((commentsFromServer) => {
+        this._comments[filmId] = commentsFromServer;
+        this._notify(UpdateType.MAJOR, filmId);
+      })
+    ;
   }
 
   removeComment(filmId, targetComment) {
     if (!this._comments.hasOwnProperty(filmId)) {
-      throw new Error(`Could not film id: ${filmId}`);
+      throw new Error(`Could not find comments for film id: ${filmId}`);
     }
     return this._api.deleteComment(targetComment.id)
       .then(() => {
@@ -44,7 +46,7 @@ export default class Comments extends Observer {
     ;
   }
 
-  getErrorComment(errorMsg = null) {
+  static getErrorComment(errorMsg = null) {
     return {
       id: `0`,
       author: `System error`,

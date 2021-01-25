@@ -1,17 +1,15 @@
-import {FilterType, getProfileRank, StatsPeriod} from "../consts";
+import {FilterType, StatsPeriod} from "../consts";
 import dayjs from "dayjs";
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Smart from "./smart";
 import {filter} from "../utils/film";
-import {capitalize} from "../utils/common";
+import {capitalize, getProfileRank} from "../utils/common";
 
 const genres = new Map();
 
 const renderChart = (statisticCtx) => {
-  const sortedGenres = [...genres].sort((previous, current) => current[1] - previous[1]);
-  genres.clear();
-
+  const sortedGenres = [...genres].sort((a, b) => b[1] - a[1]);
   const genreNames = sortedGenres.map((value) => value[0]);
   const genreValues = sortedGenres.map((value) => value[1]);
 
@@ -78,10 +76,9 @@ const renderChart = (statisticCtx) => {
 };
 
 const getStatsHTML = (data) => {
-  let chosenPeriodTime;
-  if (data.period === StatsPeriod.ALL) {
-    chosenPeriodTime = -Infinity;
-  } else {
+  genres.clear();
+  let chosenPeriodTime = -Infinity;
+  if (data.period !== StatsPeriod.ALL) {
     chosenPeriodTime = dayjs().subtract(1, data.period);
   }
 
@@ -103,19 +100,12 @@ const getStatsHTML = (data) => {
   });
 
   const getTopGenre = () => {
-    let topGenre = {
-      genre: ``,
-      watched: 0
-    };
-
-    genres.forEach((watchedNumber, genre) => {
-      if (watchedNumber > topGenre.watched) {
-        topGenre.genre = genre;
-        topGenre.watched = watchedNumber;
-      }
-    });
-
-    return topGenre.genre;
+    let topGenre = null;
+    const sortedMap = [...genres].sort((a, b) => b[1] - a[1]);
+    if (sortedMap.length > 0) {
+      [topGenre] = sortedMap.shift();
+    }
+    return topGenre;
   };
 
   const totalDuration = {
@@ -123,9 +113,7 @@ const getStatsHTML = (data) => {
     minutes: totalMinutesDuration % 60
   };
 
-  const getCheckedState = (statsPeriod) => {
-    return (data.period === statsPeriod) ? ` checked` : ``;
-  };
+  const getCheckedState = (statsPeriod) => (data.period === statsPeriod) ? ` checked` : ``;
 
   return `<section class="statistic">
   <p class="statistic__rank">

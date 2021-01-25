@@ -1,5 +1,6 @@
 import MoviesInside from "../view/movies-inside";
 import {remove, render, replace} from "../utils/render";
+import {isNull} from "../utils/common";
 
 export default class FilmsCounter {
   constructor(container, filmsModel) {
@@ -16,7 +17,7 @@ export default class FilmsCounter {
     const filmsCount = this._filmsModel.getFilms().length;
     this._counterView = new MoviesInside(filmsCount);
 
-    if (!prevCounter) {
+    if (isNull(prevCounter)) {
       render(this._counterView, this._container);
       return;
     }

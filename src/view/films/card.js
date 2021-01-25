@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import Abstract from "../abstract";
-import {FILMS_DESCRIPTION_MAX_LENGTH} from "../../consts";
+import {FILM_DESCRIPTION_MAX_LENGTH} from "../../consts";
 import {getFilmDuration} from "../../utils/film";
 
 const BUTTON_CLASSNAME = `film-card__controls-item`;
@@ -20,7 +20,7 @@ const getFilmCardHTML = (film) => {
     ${film.genres.map((genre) => `<span class="film-card__genre">${genre}</span>`).join(`\n`)}
   </p>
   <img src="${film.poster}" alt="" class="film-card__poster">
-  <p class="film-card__description">${film.description.substr(0, FILMS_DESCRIPTION_MAX_LENGTH)}…</p>
+  <p class="film-card__description">${film.description.substr(0, FILM_DESCRIPTION_MAX_LENGTH)}…</p>
   <a class="film-card__comments">${commentsCount} comment${(commentsCount > 1) ? `s` : ``}</a>
   <div class="film-card__controls">
     <button class="button ${BUTTON_CLASSNAME} ${BUTTON_CLASSNAME}--add-to-watchlist${film.isInWatchlist ? ` ${ACTIVE_BUTTON_CLASSNAME}` : ``}" type="button">Add to watchlist</button>
@@ -60,7 +60,7 @@ export default class FilmCard extends Abstract {
 
   setFavouriteClickHandler(callback) {
     this._callback.addToFavourites = callback;
-    this._addToFavouritesButton.addEventListener(`click`, this._favouriteClickHandler);
+    this._addToFavouritesButtonNode.addEventListener(`click`, this._favouriteClickHandler);
   }
 
   _favouriteClickHandler(evt) {
@@ -71,7 +71,7 @@ export default class FilmCard extends Abstract {
 
   setWatchedClickHandler(callback) {
     this._callback.markAsWatched = callback;
-    this._markAsWatchedButton.addEventListener(`click`, this._watchedClickHandler);
+    this._markAsWatchedButtonNode.addEventListener(`click`, this._watchedClickHandler);
   }
 
   _watchedClickHandler(evt) {
@@ -82,7 +82,7 @@ export default class FilmCard extends Abstract {
 
   setWatchlistClickHandler(callback) {
     this._callback.addToWatchlist = callback;
-    this._addToWatchlistButton.addEventListener(`click`, this._watchlistButtonClickHandler);
+    this._addToWatchlistButtonNode.addEventListener(`click`, this._watchlistButtonClickHandler);
   }
 
   _watchlistButtonClickHandler(evt) {
@@ -91,15 +91,15 @@ export default class FilmCard extends Abstract {
     this._callback.addToWatchlist();
   }
 
-  get _addToWatchlistButton() {
+  get _addToWatchlistButtonNode() {
     return this.querySelector(`.film-card__controls-item--add-to-watchlist`);
   }
 
-  get _markAsWatchedButton() {
+  get _markAsWatchedButtonNode() {
     return this.querySelector(`.film-card__controls-item--mark-as-watched`);
   }
 
-  get _addToFavouritesButton() {
+  get _addToFavouritesButtonNode() {
     return this.querySelector(`.film-card__controls-item--favorite`);
   }
 }

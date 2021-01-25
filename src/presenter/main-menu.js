@@ -1,4 +1,4 @@
-import MenuView from "../view/siteMenu";
+import MenuView from "../view/site-menu";
 import {remove, render, RenderPosition, replace} from "../utils/render";
 import {SiteState, UpdateType} from "../consts";
 import {getFilters} from "../utils/filters";
@@ -29,7 +29,7 @@ export default class MainMenu {
     this._siteMenu.setStatsClickHandler(this._showStatsHandler);
 
     if (isNull(prevSiteMenu)) {
-      render(this._siteMenu, this._container, RenderPosition.AFTERBEGIN);
+      render(this._siteMenu, this._container, RenderPosition.AFTER_BEGIN);
       return;
     }
 

@@ -3,7 +3,6 @@ export const HIDE_OVERFLOW_CLASSNAME = `hide-overflow`;
 export const FILMS_PER_PAGE = 5;
 export const EXTRA_FILMS_COUNT = 2;
 
-
 export const Message = {
   ALL_MOVIES: `All movies. Upcoming`,
   LOADING: `Loading...`,
@@ -42,7 +41,7 @@ export const PROFILE_RANKS = {
   'movie buff': makeInterval(21)
 };
 
-export const FILMS_DESCRIPTION_MAX_LENGTH = 140;
+export const FILM_DESCRIPTION_MAX_LENGTH = 140;
 
 export const BLANK_FILM = {
   id: ``,
@@ -65,7 +64,7 @@ export const BLANK_FILM = {
   isInFavourites: null
 };
 
-export const EMOTION = [
+export const EMOTIONS = [
   `smile`,
   `angry`,
   `puke`,
@@ -95,7 +94,7 @@ export const HttpMethod = {
   DELETE: `DELETE`
 };
 
-export const SuccessStatusRange = {
+export const HttpSuccessStatusRange = {
   START: 200,
   END: 299
 };
@@ -108,12 +107,13 @@ export const StatsPeriod = {
   YEAR: `year`
 };
 
-export const getProfileRank = (count) => {
-  const rank = Object.entries(PROFILE_RANKS).find(([, {start, end}]) => count >= start && count <= end);
-  return (rank) ? rank[0] : ``;
-};
-
 export const SiteState = {
   MOVIES: `MOVIES`,
   STATS: `STATS`
 };
+
+export const DeleteButtonText = {
+  DEFAULT: `Delete`,
+  IN_PROGRESS: `Deleting...`
+};
+

@@ -19,9 +19,9 @@ const filmsModel = new FilmsModel(api);
 const commentsModel = new CommentsModel(api);
 const filterModel = new FilterModel();
 
+let statsView = null;
 const filmListPresenter = new FilmListPresenter(mainNode, filmsModel, commentsModel, filterModel);
 
-let statsView = null;
 const siteStateChangeHandler = (state) => {
   switch (state) {
     case SiteState.MOVIES:

@@ -5,6 +5,7 @@ const getShowMoreButtonHTML = () => `<button class="films-list__show-more">Show 
 export default class ShowMoreButton extends Abstract {
   constructor() {
     super();
+
     this._clickHandler = this._clickHandler.bind(this);
   }
 

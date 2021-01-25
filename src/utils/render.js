@@ -3,8 +3,8 @@ import {addClass, bodyNode, isNull, removeClass} from "./common";
 import {HIDE_OVERFLOW_CLASSNAME, SHAKE_DURATION} from "../consts";
 
 export const RenderPosition = {
-  AFTERBEGIN: `afterbegin`,
-  BEFOREEND: `beforeend`
+  AFTER_BEGIN: `afterbegin`,
+  BEFORE_END: `beforeend`
 };
 
 export const createElement = (template) => {
@@ -13,7 +13,7 @@ export const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export const render = (element, container, place = RenderPosition.BEFOREEND) => {
+export const render = (element, container, place = RenderPosition.BEFORE_END) => {
   if (element instanceof Abstract) {
     element = element.getElement();
   }
@@ -23,10 +23,10 @@ export const render = (element, container, place = RenderPosition.BEFOREEND) => 
   }
 
   switch (place) {
-    case RenderPosition.AFTERBEGIN:
+    case RenderPosition.AFTER_BEGIN:
       container.prepend(element);
       break;
-    case RenderPosition.BEFOREEND:
+    case RenderPosition.BEFORE_END:
       container.append(element);
       break;
   }
