@@ -92,7 +92,7 @@ const getFilmDetailsHTML = (film) => {
           <div class="film-details__add-emoji-label">${(!isNull(film.activeEmotion) ? `<img src="images/emoji/${film.activeEmotion}.png" width="55" height="55" alt="emoji-smile">` : ``)}</div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"${(!film.activeEmotion) ? ` disabled` : ``}>${(film.writtenText.length > 0 && film.activeEmotion) ? he.encode(film.writtenText) : ``}</textarea>
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${(film.writtenText.length > 0) ? he.encode(film.writtenText) : ``}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
@@ -175,10 +175,6 @@ export default class FilmDetails extends Smart {
     this._setInnerHandlers();
   }
 
-  resetScroll() {
-    this._data = Object.assign({}, this._data, {scrollTop: 0});
-  }
-
   resetUserInput() {
     this._data = Object.assign({}, this._data, {
       activeEmotion: null,
@@ -188,7 +184,10 @@ export default class FilmDetails extends Smart {
   }
 
   showError() {
-    shake(this.getElement(), () => this.unlockForm());
+    shake(this.getElement(), () => {
+      this.unlockForm();
+      this._textareaNode.focus();
+    });
   }
 
   static parseFilmToData(film) {

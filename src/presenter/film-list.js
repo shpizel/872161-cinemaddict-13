@@ -120,14 +120,6 @@ export default class FilmList {
     }
   }
 
-  _closeFilmDetails() {
-    this._currentFilmId = null;
-    this._filmDetails.resetScroll();
-    remove(this._filmDetails);
-    unsetHideOverflow();
-    document.removeEventListener(`keydown`, this._escKeyDownHandler);
-  }
-
   _clearFilmDetailsComments() {
     this._commentPresenters.forEach((presenter) => presenter.destroy());
     this._commentPresenters.clear();
@@ -166,17 +158,20 @@ export default class FilmList {
   _renderFilmDetails(filmId) {
     const film = this._filmsModel.getFilmById(filmId);
     this._filmDetails.updateData(film);
-
-    if (this._currentFilmId !== filmId) {
-      this._filmDetails.resetUserInput();
-      this._currentFilmId = filmId;
-    }
-
+    this._currentFilmId = filmId;
     this._filmDetails.restoreHandlers();
     document.addEventListener(`keydown`, this._escKeyDownHandler);
     setHideOverflow();
     render(this._filmDetails, footerNode, RenderPosition.BEFORE_END);
     this._mode = Mode.POPUP;
+  }
+
+  _closeFilmDetails() {
+    remove(this._filmDetails);
+    this._currentFilmId = null;
+    this._filmDetails.resetUserInput();
+    unsetHideOverflow();
+    document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
   _handleCommentAdd(filmId, comment) {
@@ -412,7 +407,7 @@ export default class FilmList {
       return;
     }
     this._currentSortType = sortType;
-    this._clearBoard();
+    this._clearBoard({resetRenderedTasksCount: true});
     this._renderBoard();
   }
 
