@@ -1,6 +1,6 @@
 import Abstract from "../../abstract";
 
-export const getFilmsListTitleHTML = (message, isHidden = false) => {
+const getFilmsListTitleHTML = (message, isHidden = false) => {
   return `<h2 class="films-list__title${(isHidden) ? ` visually-hidden` : ``}">${message}</h2>`;
 };
 
